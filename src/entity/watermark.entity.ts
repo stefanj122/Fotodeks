@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Images } from './image.entity';
 
 @Entity({ name: 'watermark' })
 export class Watermark {
@@ -10,4 +11,7 @@ export class Watermark {
 
   @Column({ type: 'text' })
   description: string;
+
+  @OneToMany(() => Images, (images) => images.watermark)
+  images: Images;
 }

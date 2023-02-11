@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Users } from './user.entity';
+import { Watermark } from './watermark.entity';
 
 @Entity({ name: 'images' })
 export class Images {
@@ -17,4 +18,7 @@ export class Images {
 
   @ManyToOne(() => Users, (users) => users.images)
   user: Users;
+
+  @ManyToOne(() => Watermark, (watermark) => watermark.images)
+  watermark: Watermark;
 }
