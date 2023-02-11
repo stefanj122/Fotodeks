@@ -16,16 +16,16 @@ export class Users {
   @Column({ type: 'varchar', unique: true, length: 20 })
   displayName: string;
 
-  @Column({ type: 'varchar', unique: true, length: 20 })
+  @Column({ type: 'varchar', unique: true, length: 40 })
   email: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', select: false })
   password: string;
 
   @Column({ type: 'boolean', default: false })
   isApproved: boolean;
 
-  @Column({ type: 'enum', enum: Roles })
+  @Column({ type: 'enum', enum: Roles, default: Roles.User })
   role: Roles;
 
   @OneToMany(() => Images, (images) => images.user)
