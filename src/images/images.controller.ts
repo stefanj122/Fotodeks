@@ -1,7 +1,9 @@
 import { Controller } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ImagesService } from './images.service';
 
-@Controller('/users')
+@ApiTags('Images')
+@Controller('/images')
 export class ImagesController {
-  constructor(private readonly userService: ImagesService) {}
+  constructor(private readonly imagesService: ImagesService) {}
 }

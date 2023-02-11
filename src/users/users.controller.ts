@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/decorators/user.decorator';
+import { Users } from 'src/entity/user.entity';
 import { CreateUserDto } from './dto/createUserDtio.dto';
 import { LoginUserDto } from './dto/loginUserDto.dto';
 import { UsersService } from './users.service';
@@ -22,13 +24,13 @@ export class UsersController {
   @UseGuards(AuthGuard('local'))
   @ApiBody({ type: LoginUserDto })
   @Post('/login')
-  async login(@Req() req: any) {
-    return await this.authService.login(req.user);
+  async login(@User() user: Users) {
+    return await this.authService.login(user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/test')
-  async test(@Req() req: any) {
-    return req.user;
+  async test(@User() user: Users) {
+    return user;
   }
 }

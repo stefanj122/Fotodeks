@@ -1,11 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/guards/role.guard';
 import { AdminService } from './admin.service';
 
+@ApiTags('admin')
 @Controller('/admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  @Get('/approve/users')
+  @UseGuards(RolesGuard)
+  @Get('/pending/users')
   async noApprovedUsers() {
     return await this.adminService.noApprovedUsers();
   }
