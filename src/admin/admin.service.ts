@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Images } from 'src/entity/image.entity';
 import { Users } from 'src/entity/user.entity';
@@ -12,4 +12,16 @@ export class AdminService {
     @InjectRepository(Images)
     private readonly imagesRepository: Repository<Images>,
   ) {}
+
+  async approveUser(userId: number, approve: boolean) {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new BadRequestException("User doesn't exists");
+    }
+    if (approve) {
+      user.isApproved = approve;
+      return await this.usersRepository.save(user);
+    }
+    return await this.usersRepository.delete(user);
+  }
 }

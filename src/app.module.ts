@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './guards/role.guard';
 import { HomeModule } from './home/home.module';
 import { ImagesModule } from './images/images.module';
 import { UsersModule } from './users/users.module';
@@ -31,6 +33,6 @@ import { UsersModule } from './users/users.module';
     HomeModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: RolesGuard }],
 })
 export class AppModule {}

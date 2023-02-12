@@ -11,14 +11,14 @@ export class RolesGuard extends AuthGuard('jwt') implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    await (super.canActivate(context) as Promise<boolean>);
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (!requiredRoles) {
-      return false;
+      return true;
     }
+    await (super.canActivate(context) as Promise<boolean>);
     const { user } = context.switchToHttp().getRequest();
     return requiredRoles.some((role) => user.role?.includes(role));
   }

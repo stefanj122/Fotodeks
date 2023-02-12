@@ -5,7 +5,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/decorators/user.decorator';
 import { Users } from 'src/entity/user.entity';
 import { ImagesService } from 'src/images/images.service';
-import { CreateUserDto } from 'src/users/dto/createUserDtio.dto';
+import { CreateUserDto } from 'src/users/dto/createUserDto.dto';
 import { LoginUserDto } from 'src/users/dto/loginUserDto.dto';
 import { HomeService } from './home.service';
 
