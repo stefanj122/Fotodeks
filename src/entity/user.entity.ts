@@ -10,24 +10,24 @@ export class Users {
   @OneToMany(() => Images, (images) => images.user)
   images: Images;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 30 })
   firstName: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 30 })
   lastName: string;
 
-  @Column({ type: 'varchar', unique: true, length: 20 })
+  @Column({ type: 'varchar', unique: true, length: 50 })
   displayName: string;
 
-  @Column({ type: 'varchar', unique: true, length: 20 })
+  @Column({ type: 'varchar', unique: true, length: 50 })
   email: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, select: false })
   password: string;
 
   @Column({ type: 'boolean', default: false })
   isApproved: boolean;
 
-  @Column({ type: 'enum', enum: Roles })
+  @Column({ type: 'enum', enum: Roles, default: Roles.User })
   role: Roles;
 }

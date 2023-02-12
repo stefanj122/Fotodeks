@@ -25,6 +25,6 @@ export class Images {
   @Column({ type: 'varchar' })
   tags: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: false })
   isApproved: boolean;
 }

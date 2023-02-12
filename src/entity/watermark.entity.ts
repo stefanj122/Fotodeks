@@ -9,7 +9,7 @@ export class Watermark {
   @ManyToOne(() => Images, (images) => images.watermark)
   images: Images;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 50 })
   name: string;
 
   @Column({ type: 'text' })
