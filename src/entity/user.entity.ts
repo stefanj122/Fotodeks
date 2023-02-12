@@ -7,6 +7,9 @@ export class Users {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @OneToMany(() => Images, (images) => images.user)
+  images: Images;
+
   @Column({ type: 'varchar', length: 20 })
   firstName: string;
 
@@ -27,7 +30,4 @@ export class Users {
 
   @Column({ type: 'enum', enum: Roles })
   role: Roles;
-
-  @OneToMany(() => Images, (images) => images.user)
-  images: Images;
 }
