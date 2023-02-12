@@ -1,14 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/decorators/user.decorator';
 import { Users } from 'src/entity/user.entity';
-import { CreateUserDto } from './dto/createUserDtio.dto';
-import { LoginUserDto } from './dto/loginUserDto.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
+@UseGuards(AuthGuard('jwt'))
 @Controller('/users')
 export class UsersController {
   constructor(
@@ -16,20 +15,8 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
-  @Post('/singup')
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return await this.userService.createUser(createUserDto);
-  }
-
-  @UseGuards(AuthGuard('local'))
-  @ApiBody({ type: LoginUserDto })
-  @Post('/login')
-  async login(@User() user: Users) {
-    return await this.authService.login(user);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
   @Get('/test')
+  @ApiBearerAuth()
   async test(@User() user: Users) {
     return user;
   }

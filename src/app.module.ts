@@ -5,6 +5,7 @@ import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { HomeModule } from './home/home.module';
 import { ImagesModule } from './images/images.module';
 import { UsersModule } from './users/users.module';
 
@@ -27,6 +28,7 @@ import { UsersModule } from './users/users.module';
     ImagesModule,
     AuthModule,
     AdminModule,
+    HomeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

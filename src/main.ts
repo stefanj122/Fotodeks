@@ -12,6 +12,7 @@ async function bootstrap() {
     .setDescription('Images cloud')
     .setVersion('2.0')
     .addTag('fotodesk')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/docs', app, document);

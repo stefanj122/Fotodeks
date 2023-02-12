@@ -9,4 +9,15 @@ export class ImagesService {
     @InjectRepository(Images)
     private readonly imagesRepository: Repository<Images>,
   ) {}
+
+  async getAllImages() {
+    return await this.imagesRepository.find({
+      where: { isApproved: true },
+      relations: ['watermark'],
+    });
+  }
+
+  async noApprovedImages() {
+    return await this.imagesRepository.find({ where: { isApproved: false } });
+  }
 }
