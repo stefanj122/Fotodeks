@@ -33,4 +33,8 @@ export class UsersService {
   async findOneById(id: number) {
     return await this.usersRepository.findOneBy({ id });
   }
+
+  async findOneByDisplayName(displayName: string) {
+    return await this.usersRepository.findOneBy({ displayName });
+  }
 }

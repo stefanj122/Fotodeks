@@ -10,7 +10,7 @@ import { ImagesService } from './images.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Images, Watermark, Users]),
+    TypeOrmModule.forFeature([Images, Users, Watermark]),
     MulterModule.register({
       dest: process.cwd() + '/photos',
     }),

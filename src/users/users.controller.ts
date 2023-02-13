@@ -4,6 +4,7 @@ import {
   Header,
   Param,
   ParseIntPipe,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -32,7 +33,11 @@ export class UsersController {
   @Get('/download/image/:id')
   @ApiBearerAuth()
   @Header('Content-Type', 'image/png')
-  async downloadImage(@Param('id', ParseIntPipe) imageId: number) {
-    return await this.imagesService.downloadImage(imageId);
+  async downloadImage(
+    @Param('id', ParseIntPipe) imageId: number,
+    @Query('width', ParseIntPipe) width: number,
+    @Query('height', ParseIntPipe) height: number,
+  ) {
+    return await this.imagesService.downloadImage(imageId, width, height);
   }
 }

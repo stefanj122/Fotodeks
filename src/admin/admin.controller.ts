@@ -4,8 +4,12 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
@@ -42,5 +46,12 @@ export class AdminController {
     @Param('id', ParseIntPipe) userId: number,
   ) {
     return await this.adminService.approveUser(userId, approve);
+  }
+
+  @ApiBasicAuth()
+  @UseInterceptors(FileInterceptor('watermark'))
+  @Post('/watermark')
+  async uploadWatermark(@UploadedFile() watermark: Express.Multer.File) {
+    return await this.adminService.uploadWatermark(watermark);
   }
 }
