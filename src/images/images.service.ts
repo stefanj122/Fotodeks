@@ -60,20 +60,26 @@ export class ImagesService {
     const watermark = await this.watermarkRepository.findOneBy({
       isDefafult: true,
     });
-    const file = await new Promise<Buffer>((resolve, reject) => {
-      fs.readFile(join(process.cwd(), `/photos/${image.name}`), (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-    const data = await sharp(file)
+    // const file = await new Promise<Buffer>((resolve, reject) => {
+    //   fs.readFile(join(process.cwd(), `/photos/${image.name}`), (err, data) => {
+    //     if (err) {
+    //       reject(err);
+    //     } else {
+    //       resolve(data);
+    //     }
+    //   });
+    // });
+    const png = await sharp(
+      join(process.cwd(), '/photos/watermark/' + watermark.name),
+    )
+      .resize(height - 100)
+      .png()
+      .toBuffer();
+    const data = await sharp(join(process.cwd(), `/photos/${image.name}`))
       .resize(width, height)
       .composite([
         {
-          input: join(process.cwd(), '/photos/watermark/' + watermark.name),
+          input: png,
           gravity: 'center',
         },
       ])

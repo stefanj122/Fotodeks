@@ -33,12 +33,16 @@ export class AdminService {
       file.path,
       join(process.cwd(), '/photos/watermark/' + file.originalname),
     );
-    const photo = fs.readFileSync(
-      join(process.cwd(), '/photos/watermark/' + file.originalname),
-    );
+    const photo = await new Promise<Buffer>((resolve, rejects) => {
+      fs.readFile(
+        join(process.cwd(), '/photos/watermark/' + file.originalname),
+        (err, data) => {
+          err ? rejects(err) : resolve(data);
+        },
+      );
+    });
     sharp(photo)
       .resize(500)
-      .blur(10)
       .toFile(join(process.cwd(), '/photos/watermark/' + file.originalname));
     return await this.watermarkRepository.save({
       name: file.originalname,
