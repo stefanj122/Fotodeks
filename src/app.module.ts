@@ -5,7 +5,7 @@ import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ImagesModule } from './images/images.module';
-import { UsersModule } from './users/users.module';
+import { WatermarksModule } from './watermarks/watermarks.module';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { UsersModule } from './users/users.module';
       migrations: ['./dist/migration/*.js'],
       autoLoadEntities: true,
     }),
-    UsersModule,
+    WatermarksModule,
     ImagesModule,
     AdminModule,
   ],
