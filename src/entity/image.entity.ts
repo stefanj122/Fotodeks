@@ -18,7 +18,7 @@ export class Images {
   @Column({ type: 'uuid' })
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   tags: string;
 
   @Column({ type: 'boolean', default: false })

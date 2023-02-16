@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Images } from './image.entity';
+import { Watermark } from './watermark.entity';
 
 @Entity({ name: 'users' })
 export class Users {
@@ -16,7 +17,10 @@ export class Users {
   id: number;
 
   @OneToMany(() => Images, (images) => images.user)
-  images: Images;
+  images: Images[];
+
+  @OneToMany(() => Watermark, (watermarks) => watermarks.user)
+  watermarks: Watermark[];
 
   @Column({ type: 'varchar', length: 30 })
   firstName: string;
