@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import { join } from 'path';
 import * as sharp from 'sharp';
 import { Watermark } from 'src/entity/watermark.entity';
+import { TagsDto } from './dto/TagsDto.dto';
 
 @Injectable()
 export class ImagesService {
@@ -33,22 +34,30 @@ export class ImagesService {
     return await this.imagesRepository.find({ where: { isApproved: false } });
   }
 
-  async uploadPhotos(
-    photos: Array<Express.Multer.File>,
-    user: Users,
-    tags: string,
-  ) {
+  async uploadPhotos(photos: Array<Express.Multer.File>, user: Users) {
     const arrOfPromises = [];
 
     photos.forEach((photo) => {
       const photoName = uuidv4();
       fs.renameSync(photo.path, process.cwd() + '/photos/' + photoName);
       arrOfPromises.push(
-        this.imagesRepository.save({ name: photoName, user: user, tags }),
+        this.imagesRepository.save({ name: photoName, user: user }),
       );
     });
     Promise.all(arrOfPromises).then((values) => {
       console.log(values);
+    });
+  }
+
+  async addTags(tags: TagsDto[]) {
+    const arrOfPromises: Promise<Images>[] = [];
+    tags.forEach((tag) => {
+      arrOfPromises.push(
+        this.imagesRepository.save({ id: tag.id, tags: tag.tags }),
+      );
+    });
+    Promise.all(arrOfPromises).then(() => {
+      console.log('Tags updated');
     });
   }
 

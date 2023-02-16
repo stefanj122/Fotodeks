@@ -1,5 +1,13 @@
 import { Role } from 'src/enums/role.enum';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Images } from './image.entity';
 
 @Entity({ name: 'users' })
@@ -25,9 +33,18 @@ export class Users {
   @Column({ type: 'boolean', default: false })
   isApproved: boolean;
 
-  @Column({ type: 'enum', enum: Role, default: Role.User })
+  @Column({ type: 'varchar', default: Role.User })
   role: Role;
 
   @OneToMany(() => Images, (images) => images.user)
   images: Images;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

@@ -42,8 +42,12 @@ export class AdminService {
       );
     });
     sharp(photo)
-      .resize(500)
-      .toFile(join(process.cwd(), '/photos/watermark/' + file.originalname));
+      .resize(285, 90)
+      .png()
+      .ensureAlpha(0)
+      .toFile(
+        join(process.cwd(), '/photos/watermark/285x90/' + file.originalname),
+      );
     return await this.watermarkRepository.save({
       name: file.originalname,
       description: 'Watermark',

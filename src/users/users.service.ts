@@ -10,20 +10,14 @@ export class UsersService {
     private readonly usersRepository: Repository<Users>,
   ) {}
 
-  async findOneByEmail(email: string): Promise<Users> {
-    return await this.usersRepository.findOne({
-      where: { email },
-      select: {
-        id: true,
-        displayName: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        password: true,
-        role: true,
-        isApproved: true,
-      },
-    });
+  async findOneByAuth(email: string): Promise<any> {
+    return await this.usersRepository
+      .createQueryBuilder('users')
+      .select('*')
+      .where('email = :username OR displayName = :username', {
+        username: email,
+      })
+      .getRawOne();
   }
 
   async noApprovedUsers() {
@@ -36,5 +30,9 @@ export class UsersService {
 
   async findOneByDisplayName(displayName: string) {
     return await this.usersRepository.findOneBy({ displayName });
+  }
+
+  async findOneByEmail(email: string) {
+    return await this.usersRepository.findOneBy({ email });
   }
 }

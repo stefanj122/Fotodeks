@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
 import { ImagesService } from 'src/images/images.service';
@@ -40,7 +40,7 @@ export class AdminController {
   }
 
   @Patch('/approve/user/:id')
-  @ApiBasicAuth()
+  @ApiBearerAuth()
   async approveUser(
     @Query('approve') approve: boolean,
     @Param('id', ParseIntPipe) userId: number,
@@ -48,9 +48,21 @@ export class AdminController {
     return await this.adminService.approveUser(userId, approve);
   }
 
-  @ApiBasicAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        watermark: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(FileInterceptor('watermark'))
   @Post('/watermark')
+  @ApiBearerAuth()
   async uploadWatermark(@UploadedFile() watermark: Express.Multer.File) {
     return await this.adminService.uploadWatermark(watermark);
   }

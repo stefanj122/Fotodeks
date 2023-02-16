@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Users } from './user.entity';
 
 @Entity({ name: 'images' })
@@ -9,7 +15,7 @@ export class Images {
   @Column({ type: 'uuid' })
   name: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: true, default: null })
   tags: string;
 
   @Column({ type: 'boolean', default: false })
@@ -17,4 +23,7 @@ export class Images {
 
   @ManyToOne(() => Users, (users) => users.images)
   user: Users;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

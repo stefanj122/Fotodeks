@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Header,
   Post,
   UploadedFiles,
   UseGuards,
@@ -8,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { UsersService } from 'src/users/users.service';
+import { TagsDto } from './dto/TagsDto.dto';
 import { ImagesService } from './images.service';
 
 @ApiTags('Images')
@@ -22,15 +24,37 @@ export class ImagesController {
     private readonly usersService: UsersService,
   ) {}
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        photos: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   @Post('/upload')
   @ApiBearerAuth()
   @UseInterceptors(FilesInterceptor('photos'))
+  @Header('Content-Type', 'multipart/form-data')
   async uploadPhotos(
     @UploadedFiles() photos: Array<Express.Multer.File>,
     @User() user: any,
-    @Body('tags') tags: string,
   ) {
     const currentUser = await this.usersService.findOneById(user.id);
-    return await this.imagesService.uploadPhotos(photos, currentUser, tags);
+    return await this.imagesService.uploadPhotos(photos, currentUser);
+  }
+
+  @Post('/add/tags')
+  @ApiBearerAuth()
+  @ApiBody({ isArray: true, type: TagsDto })
+  async addTags(@Body() tags: TagsDto[]) {
+    return await this.imagesService.addTags(tags);
   }
 }

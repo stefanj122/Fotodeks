@@ -10,10 +10,10 @@ import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class SingUpMiddleware implements NestMiddleware {
   constructor(private readonly usersService: UsersService) {}
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     const createUser: CreateUserDto = req.body;
-    const email = this.usersService.findOneByEmail(createUser.email);
-    const displayName = this.usersService.findOneByDisplayName(
+    const email = await this.usersService.findOneByEmail(createUser.email);
+    const displayName = await this.usersService.findOneByDisplayName(
       createUser.displayName,
     );
     if (email || displayName) {
