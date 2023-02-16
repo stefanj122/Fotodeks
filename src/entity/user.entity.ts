@@ -1,4 +1,3 @@
-import { Roles } from 'src/enums/role.enum';
 import {
   Column,
   CreateDateColumn,
@@ -37,11 +36,11 @@ export class Users {
   @Column({ type: 'varchar', length: 50, select: false })
   password: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: true })
   isApproved: boolean;
 
-  @Column({ type: 'varchar', default: Roles.User })
-  role: Roles;
+  @Column({ type: 'varchar', default: 'user' })
+  role: string;
 
   @CreateDateColumn()
   createdAt: Date;
