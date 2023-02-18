@@ -5,5 +5,5 @@ import { ImagesService } from './images.service';
 @ApiTags('images')
 @Controller('/images')
 export class ImagesController {
-  constructor(private readonly userService: ImagesService) {}
+  constructor(private readonly imagesService: ImagesService) {}
 }
