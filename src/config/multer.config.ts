@@ -16,14 +16,16 @@ export const imagesStorage = {
   }),
 };
 
-export const watermarkStorage = {
+export const watermarksStorage = {
   storage: diskStorage({
     destination: (req, file, cb) => {
       const destination = join(__dirname, '../../uploads/watermarks/');
       cb(null, destination);
     },
     filename: (req, file, cb) => {
-      cb(null, file.originalname);
+      const filename = uuidv4();
+      const extension = extname(file.originalname);
+      cb(null, filename + extension);
     },
   }),
 };
