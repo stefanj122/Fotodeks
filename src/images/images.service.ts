@@ -13,7 +13,7 @@ export class ImagesService {
     private readonly imagesRepository: Repository<Images>,
   ) {}
 
-  async generateThumbnail(path: string, thumbsize: string): Promise<any> {
+  async generateThumbnail(path: string, thumbsize: string): Promise<boolean> {
 
     const imageName = basename(path);
     const image = await this.imagesRepository.findOneBy({ name: imageName });
@@ -30,6 +30,6 @@ export class ImagesService {
       Number(WxH[0]), 
       Number(WxH[1]),
     )
-    .toFile(join(thumbnailPath, imageName))
+    .toFile(join(thumbnailPath, imageName)).then(() => true).catch(() => false);
   }
 }
