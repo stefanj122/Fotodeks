@@ -13,14 +13,14 @@ export class ImagesService {
     private readonly imagesRepository: Repository<Images>,
   ) {}
 
-  async generateThumbnail(path: string, thumbsize: string): Promise<boolean> {
+  async generateThumbnail(path: string, thumbsize: string): Promise<string> {
 
     const imageName = basename(path);
     const image = await this.imagesRepository.findOneBy({ name: imageName });
     const thumbnailPath = join(process.cwd(), "public/images", `${image.id}`, thumbsize);
 
     if(existsSync(thumbnailPath)) {
-      return true;
+      return thumbnailPath;
     }
     mkdirSync(thumbnailPath, {recursive: true});
 
@@ -31,5 +31,6 @@ export class ImagesService {
       Number(WxH[1]),
     )
     .toFile(join(thumbnailPath, imageName)).then(() => true).catch(() => false);
+    return thumbnailPath;
   }
 }
