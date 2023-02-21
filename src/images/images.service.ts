@@ -28,7 +28,7 @@ export class ImagesService {
       __dirname,
       '../../public/images',
       `${watermark.id}`,
-      '285x190',
+      process.env.BASE_THUMBNAIL_SIZE,
     );
     if (!existsSync(thumbnailPath)) {
       mkdirSync(thumbnailPath, { recursive: true });
@@ -45,12 +45,12 @@ export class ImagesService {
         name: photo.name,
         path: join(thumbnailPath, photo.name),
       });
-
-      sharp(join(__dirname, '../../uploads/images/', photo.name))
-        .resize(285, 190)
+      const [width, height] = process.env.BASE_THUMBNAIL_SIZE.split('x');
+      sharp(join(process.env.IMAGE_PATH, photo.name))
+        .resize(+width, +height)
         .composite([
           {
-            input: join(__dirname, '../../uploads/watermarks/', watermark.name),
+            input: join(process.env.WATERMARK_PATH, watermark.name),
             gravity: 'center',
           },
         ])

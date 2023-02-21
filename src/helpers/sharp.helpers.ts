@@ -1,3 +1,1 @@
-export const generateThumbnail = () => {
-  return true;
-};
+export const generateThumbnail = () => {};
