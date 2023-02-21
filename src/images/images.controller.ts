@@ -1,13 +1,12 @@
 import {
   Controller,
-  FileTypeValidator,
-  ParseFilePipe,
   Post,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileValidator } from 'src/config/fileValidator.config';
 import { imagesStorage } from 'src/config/multer.config';
 import { ImagesService } from './images.service';
 
@@ -16,19 +15,26 @@ import { ImagesService } from './images.service';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   @Post('upload')
   @UseInterceptors(FilesInterceptor('images', 30, imagesStorage))
   async uploadImages(
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({
-            fileType: /png|jpeg|jpg/g,
-          }),
-        ],
-      }),
-    )
-    images: Array<Express.Multer.File>,
+    @UploadedFiles(FileValidator)
+    images: Express.Multer.File[],
   ): Promise<{ data: { id: number; name: string; path: string }[] }> {
     return await this.imagesService.uploadImages(images);
   }
