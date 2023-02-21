@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './authentification/autentification.module';
 import { ImagesModule } from './images/images.module';
 import { WatermarksModule } from './watermarks/watermarks.module';
 
@@ -25,6 +26,7 @@ import { WatermarksModule } from './watermarks/watermarks.module';
     WatermarksModule,
     ImagesModule,
     AdminModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
