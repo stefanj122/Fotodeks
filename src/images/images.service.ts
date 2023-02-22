@@ -101,7 +101,6 @@ export class ImagesService {
     const paramTwo = params[1] ? params[1] : '';
     const paramThree = params[2] ? params[2] : '';
 
-    console.log(paramOne, paramTwo, paramThree);
     const data = await this.imagesRepository
       .createQueryBuilder('images')
       .select('*')
