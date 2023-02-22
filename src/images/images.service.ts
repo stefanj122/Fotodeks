@@ -95,4 +95,15 @@ export class ImagesService {
       .toBuffer();
     return new StreamableFile(data);
   }
+  async searchImages(searchParam: string) {
+    const [paramOne, paramTwo, paramThree, ...rest] = searchParam.split(' ');
+    const data = await this.imagesRepository
+      .createQueryBuilder('images')
+      .select('*')
+      .where('tags LIKE :paramOne', { paramOne: `%${paramTwo}%` })
+      .andWhere('tags LIKE :paramOne', { paramOne: `%${paramOne}%` })
+      .andWhere('tags LIKE :paramOne', { paramOne: `%${paramThree}%` })
+      .getRawMany();
+    return { data };
+  }
 }
