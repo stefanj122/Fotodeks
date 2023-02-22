@@ -57,4 +57,8 @@ export class ImagesController {
   async addTags(@Body() tags: TagsDto[]) {
     return await this.imagesService.addTags(tags);
   }
+  @Get()
+  async searchImages(@Query('search') searchParam: string) {
+    return await this.imagesService.searchImages(searchParam);
+  }
 }
