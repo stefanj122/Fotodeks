@@ -96,7 +96,12 @@ export class ImagesService {
     return new StreamableFile(data);
   }
   async searchImages(searchParam: string) {
-    const [paramOne, paramTwo, paramThree, ...rest] = searchParam.split(' ');
+    const params = searchParam.split(' ') || '';
+    const paramOne = params[0] ? params[0] : '';
+    const paramTwo = params[1] ? params[1] : '';
+    const paramThree = params[2] ? params[2] : '';
+
+    console.log(paramOne, paramTwo, paramThree);
     const data = await this.imagesRepository
       .createQueryBuilder('images')
       .select('*')
