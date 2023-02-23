@@ -35,10 +35,11 @@ export class AuthService {
     };
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
-      delete newUser.password;
+        delete newUser.password;
       return {
         message: 'Successfully created',
         data: newUser,
+        token: await this.login(newUser),
       };
     } else {
       throw new BadRequestException('User not created');
