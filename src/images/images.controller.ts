@@ -57,8 +57,15 @@ export class ImagesController {
   async addTags(@Body() tags: TagsDto[]) {
     return await this.imagesService.addTags(tags);
   }
-  @Get()
-  async searchImages(@Query('search') searchParam: string) {
-    return await this.imagesService.searchImages(searchParam);
+  @ApiQuery({
+    name: 'search',
+    type: 'string',
+    description: 'Max three parametars',
+  })
+  @Get('/search')
+  async searchImages(
+    @Query('search') searchQuery: string,
+  ): Promise<{ count: number; data: Image[] }> {
+    return await this.imagesService.searchImages(searchQuery);
   }
 }
