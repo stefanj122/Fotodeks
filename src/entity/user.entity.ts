@@ -8,16 +8,16 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Images } from './image.entity';
+import { Image } from './image.entity';
 import { Watermark } from './watermark.entity';
 
 @Entity({ name: 'users' })
-export class Users {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => Images, (images) => images.user)
-  images: Images[];
+  @OneToMany(() => Image, (images) => images.user)
+  images: Image[];
 
   @OneToMany(() => Watermark, (watermarks) => watermarks.user)
   watermarks: Watermark[];
