@@ -46,7 +46,7 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(username);
-    return user? await bcrypt.compare(pass, user.password) : null;
+    return user && await bcrypt.compare(pass, user.password) ? user : null;
   }
     
   async login(user: JwtPayloadType) {
@@ -58,6 +58,8 @@ export class AuthService {
       role: user.role,
     };
     return {
+      message: 'Successfully logged!',
+      data: user,
       access_token: this.jwtService.sign(payload, {
         privateKey: process.env.JWT_SECRET,
         expiresIn: '10h',
