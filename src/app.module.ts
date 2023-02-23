@@ -3,9 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './admin/user/user.module';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './authentification/autentification.module';
+import { AuthModule } from './authentification/autentication.module';
 import { ImagesModule } from './images/images.module';
 import { WatermarksModule } from './watermarks/watermarks.module';
 
@@ -30,7 +29,7 @@ import { WatermarksModule } from './watermarks/watermarks.module';
     AuthModule,
     UserModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [AppService],
 })
 export class AppModule {}

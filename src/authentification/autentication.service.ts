@@ -17,17 +17,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async registerNewUser(user: UserDto) {
-    const users = await this.userRepository
+  async register(createUserDto: UserDto) {
+    const user = await this.userRepository
       .createQueryBuilder('user')
       .select('*')
-      .where('user.email = :email', { email: user.email })
+      .where('user.email = :email', { email: createUserDto.email })
       .orWhere('user.displayName = :displayName', {
-        displayName: user.displayName,
+        displayName: createUserDto.displayName,
       })
       .getRawOne();
-    if (users) {
-      throw new BadRequestException('Email is in use!');
+    if (user) {
+      throw new BadRequestException('Email or display name is in use!');
     }
     const preparedUser = {
       ...user,
@@ -41,21 +41,12 @@ export class AuthService {
         data: newUser,
         token: await this.login(newUser),
       };
-    } else {
-      throw new BadRequestException('User not created');
     }
   }
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(username);
-
-    if (user && user.isApproved === false) {
-      const passOK = await bcrypt.compare(pass, user.password);
-      if (passOK) {
-        return user;
-      }
-    }
-    return null;
+    return user? await bcrypt.compare(pass, user.password) : null;
   }
     
   async login(user: Users) {

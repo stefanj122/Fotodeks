@@ -10,12 +10,12 @@ export class UserService {
     private userRepository: Repository<Users>,
   ) {}
 
-  async findOne(email: string): Promise<Users | undefined> {
+  async findOne(input: string): Promise<Users | undefined> {
     return await this.userRepository
       .createQueryBuilder('user')
       .select('*')
-      .where('user.email = :email', { email: email })
-      .orWhere('user.displayName = :displayName', { displayName: email })
+      .where('user.email = :email', { email: input })
+      .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
 }

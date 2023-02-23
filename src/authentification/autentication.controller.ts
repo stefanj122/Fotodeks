@@ -12,7 +12,7 @@ import { LoginDto } from './dto/loginUser.dto';
 import { UserDto } from './dto/registerUser.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
-import { AuthService } from './autentification.service';
+import { AuthService } from './autentication.service';
 
 @ApiTags('auth')
 @Controller('/auth')
@@ -21,7 +21,7 @@ export class AuthController {
 
   @Post('/register')
   async registerUser(@Body() body: UserDto) {
-    return await this.authService.registerNewUser(body);
+    return await this.authService.register(body);
   }
 
   @UseGuards(LocalAuthGuard)
