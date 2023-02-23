@@ -62,7 +62,7 @@ export class AuthService {
       data: user,
       access_token: this.jwtService.sign(payload, {
         privateKey: process.env.JWT_SECRET,
-        expiresIn: '10h',
+        expiresIn: process.env.JWT_EXPIRATION,
       }),
     };
   }
