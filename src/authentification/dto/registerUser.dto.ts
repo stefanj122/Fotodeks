@@ -34,7 +34,4 @@ export class UserDto {
   @IsBoolean()
   isApproved: boolean;
 
-  @ApiProperty({ default: 'user' })
-  @IsString()
-  role: string;
 }

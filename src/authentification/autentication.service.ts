@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/admin/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +38,7 @@ export class AuthService {
       return {
         message: 'Successfully created',
         data: newUser,
-        token: await this.login(newUser),
+        access_token: await this.login(newUser),
       };
     }
   }
@@ -59,7 +58,7 @@ export class AuthService {
     };
     return {
       access_token: this.jwtService.sign(payload, {
-        privateKey: jwtConstants.secret,
+        privateKey: process.env.JWT_SECRET,
         expiresIn: '10h',
       }),
     };
