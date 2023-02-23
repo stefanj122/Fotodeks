@@ -7,15 +7,15 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'images' })
-export class Images {
+export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Users, (user) => user.images)
-  user: Users;
+  @ManyToOne(() => User, (user) => user.images)
+  user: User;
 
   @Column({ type: 'uuid' })
   name: string;

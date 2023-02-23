@@ -1,7 +1,10 @@
 # compiled output
 /dist
 /node_modules
-/uploads
+/uploads/images/*
+/uploads/watermarks/*
+/public/images/*
+
 
 # Logs
 logs
