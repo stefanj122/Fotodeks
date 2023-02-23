@@ -1,13 +1,13 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'watermark' })
 export class Watermark {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Users, (user) => user.watermarks)
-  user: Users;
+  @ManyToOne(() => User, (user) => user.watermarks)
+  user: User;
 
   @Column({ type: 'varchar', length: 50 })
   name: string;

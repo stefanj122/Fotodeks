@@ -2,24 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { Images } from 'src/entity/image.entity';
+import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
-import * as sharp from 'sharp';
 import { Watermark } from 'src/entity/watermark.entity';
+import { sharpHelper } from 'src/helpers/sharp.helpers';
+import { User } from 'src/entity/user.entity';
 
 @Injectable()
 export class ImagesService {
   constructor(
-    @InjectRepository(Images)
-    private readonly imagesRepository: Repository<Images>,
+    @InjectRepository(Image)
+    private readonly imagesRepository: Repository<Image>,
     @InjectRepository(Watermark)
     private readonly watermarksRepository: Repository<Watermark>,
   ) {}
 
   async uploadImages(
     images: Array<Express.Multer.File>,
+    user: User,
   ): Promise<{ data: { id: number; name: string; path: string }[] }> {
-    const arrOfPromies: Promise<Images>[] = [];
+    const arrOfPromies: Promise<Image>[] = [];
     const data = [];
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
@@ -30,12 +32,20 @@ export class ImagesService {
       `${watermark.id}`,
       process.env.BASE_THUMBNAIL_SIZE,
     );
+
+    const watermarkPath = join(
+      __dirname,
+      '../../uploads/watermarks/',
+      watermark.name,
+    );
     if (!existsSync(thumbnailPath)) {
       mkdirSync(thumbnailPath, { recursive: true });
     }
 
     images.forEach((image) => {
-      arrOfPromies.push(this.imagesRepository.save({ name: image.filename }));
+      arrOfPromies.push(
+        this.imagesRepository.save({ name: image.filename, user }),
+      );
     });
 
     const savedImages = await Promise.all(arrOfPromies);
@@ -43,18 +53,19 @@ export class ImagesService {
       data.push({
         id: photo.id,
         name: photo.name,
-        path: join(thumbnailPath, photo.name),
+        path: join(
+          process.env.BASE_URL,
+          'public/images',
+          `${watermark.id}`,
+          process.env.BASE_THUMBNAIL_SIZE,
+          photo.name,
+        ),
       });
-      const [width, height] = process.env.BASE_THUMBNAIL_SIZE.split('x');
-      sharp(join(process.env.IMAGE_PATH, photo.name))
-        .resize(+width, +height)
-        .composite([
-          {
-            input: join(process.env.WATERMARK_PATH, watermark.name),
-            gravity: 'center',
-          },
-        ])
-        .toFile(join(thumbnailPath, photo.name));
+
+      const imagePath = join(__dirname, '../../uploads/images/', photo.name);
+      sharpHelper(imagePath, watermarkPath).toFile(
+        join(thumbnailPath, photo.name),
+      );
     });
 
     return { data };
