@@ -28,7 +28,7 @@ import { WatermarksModule } from './watermarks/watermarks.module';
     ImagesModule,
     AdminModule,
     AuthModule,
-    UserModule
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
