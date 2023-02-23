@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/admin/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayloadType } from 'src/types/payloadType';
 
 @Injectable()
 export class AuthService {
@@ -48,8 +49,8 @@ export class AuthService {
     return user? await bcrypt.compare(pass, user.password) : null;
   }
     
-  async login(user: Users) {
-    const payload = {
+  async login(user: JwtPayloadType) {
+    const payload= {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
