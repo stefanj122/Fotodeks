@@ -31,9 +31,9 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/:id')
-  getOne(@Param('id') id: number, @Request() req: any) {
-    return req.user;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('/:id')
+  // getOne(@Param('id') id: number, @Request() req: any) {
+  //   return req.user;
+  // }
 }
