@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
-import { join, basename } from 'path';
+import { join } from 'path';
 import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { User } from 'src/entity/user.entity';
-import * as sharp from 'sharp';
 
 @Injectable()
 export class ImagesService {
@@ -56,7 +55,7 @@ export class ImagesService {
         name: photo.name,
         path: join(
           process.env.BASE_URL,
-          'public/images',
+          'images',
           `${watermark.id}`,
           process.env.BASE_THUMBNAIL_SIZE,
           photo.name,
@@ -70,30 +69,5 @@ export class ImagesService {
     });
 
     return { data };
-  }
-
-  async generateThumbnail(path: string, thumbsize: string): Promise<string> {
-    const imageName = basename(path);
-    const image = await this.imagesRepository.findOneBy({ name: imageName });
-    const thumbnailPath = join(
-      process.cwd(),
-      'public/images',
-      `${image.id}`,
-      thumbsize,
-    );
-
-    if (existsSync(thumbnailPath)) {
-      return thumbnailPath;
-    }
-    mkdirSync(thumbnailPath, { recursive: true });
-
-    const WxH = thumbsize.split('x');
-
-    sharp(path)
-      .resize(Number(WxH[0]), Number(WxH[1]))
-      .toFile(join(thumbnailPath, imageName))
-      .then(() => true)
-      .catch(() => false);
-    return thumbnailPath;
   }
 }

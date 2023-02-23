@@ -13,6 +13,7 @@ import { join } from 'path';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/*'],
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
