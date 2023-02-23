@@ -95,19 +95,59 @@ export class ImagesService {
       .toBuffer();
     return new StreamableFile(data);
   }
-  async searchImages(searchParam: string) {
-    const params = searchParam.split(' ') || '';
-    const paramOne = params[0] ? params[0] : '';
-    const paramTwo = params[1] ? params[1] : '';
-    const paramThree = params[2] ? params[2] : '';
+  async searchImages(
+    searchQeury: string,
+    userId: number | string = '%',
+    data: Image[] = [],
+    i = 12,
+  ): Promise<{ count: number; data: Image[] }> {
+    const params = searchQeury.split(' ');
+    let result = data;
 
-    const data = await this.imagesRepository
-      .createQueryBuilder('images')
-      .select('*')
-      .where('tags LIKE :paramOne', { paramOne: `%${paramTwo}%` })
-      .andWhere('tags LIKE :paramOne', { paramOne: `%${paramOne}%` })
-      .andWhere('tags LIKE :paramOne', { paramOne: `%${paramThree}%` })
-      .getRawMany();
-    return { data };
+    if (params.length > 3) {
+      return { count: 0, data: [] };
+    } else if (params.length === 1) {
+      params[1] = '';
+      params[2] = '';
+    } else if (params.length === 2) {
+      params[2] = '';
+    }
+    const [x, y, z] = i.toString().padStart(3, '0').split('');
+
+    if (
+      params[x] &&
+      (params[y] || params[y] === '') &&
+      (params[z] || params[z] === '') &&
+      x !== y &&
+      y !== z &&
+      x !== z
+    ) {
+      result = await this.imagesRepository
+        .createQueryBuilder('images')
+        .select('*')
+        .where('tags LIKE :query AND userId LIKE :userId', {
+          query: `%${params[+x]}%${params[+y]}%${params[+z]}%`,
+          userId,
+        })
+        .andWhere('isApproved = :approved', { approved: true })
+        .getRawMany();
+      if (result.length !== 0) {
+        result = result.filter((ael) => {
+          return !data.some((bel) => {
+            return ael.id === bel.id;
+          });
+        });
+        result = result.concat(data);
+      } else {
+        result = data;
+      }
+    }
+    if (i < 1000) {
+      i++;
+      return await this.searchImages(searchQeury, userId, result, i);
+    } else {
+      result = result.sort((a, b) => +b.createdAt - +a.createdAt);
+      return { count: data.length, data: result };
+    }
   }
 }
