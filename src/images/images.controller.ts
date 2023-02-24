@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -9,6 +11,7 @@ import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileValidator } from 'src/config/fileValidator.config';
 import { imagesStorage } from 'src/config/multer.config';
 import { GetUser } from 'src/decorator/get-user.decorator';
+import { Image } from 'src/entity/image.entity';
 import { User } from 'src/entity/user.entity';
 import { ImagesService } from './images.service';
 
@@ -40,5 +43,11 @@ export class ImagesController {
     @GetUser() user: User,
   ): Promise<{ data: { id: number; name: string; path: string }[] }> {
     return await this.imagesService.uploadImages(images, user);
+  }
+  @Get('/search')
+  async searchImages(
+    @Query('search') searchQuery: string,
+  ): Promise<{ count: number; data: Image[] }> {
+    return await this.imagesService.searchImages(searchQuery);
   }
 }

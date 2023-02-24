@@ -33,5 +33,4 @@ export class UserDto {
   @ApiProperty()
   @IsBoolean()
   isApproved: boolean;
-
 }

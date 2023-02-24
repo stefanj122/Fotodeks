@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { User } from 'src/entity/user.entity';
+import { permutationsOfArray } from 'src/helpers/permutateArray.helper';
 
 @Injectable()
 export class ImagesService {
@@ -69,5 +70,42 @@ export class ImagesService {
     });
 
     return { data };
+  }
+
+  async searchImages(
+    searchQuery: any,
+    userId: number | string = '%',
+  ): Promise<{ count: number; data: Image[] }> {
+    const params = searchQuery.split(' ');
+    const arr = permutationsOfArray(params.slice(0, 3));
+    const arrOfPromises: Promise<Image[]>[] = [];
+
+    arr.forEach((query) => {
+      arrOfPromises.push(
+        this.imagesRepository
+          .createQueryBuilder('images')
+          .select('*')
+          .where('tags LIKE :query AND userId LIKE :userId', {
+            query,
+            userId,
+          })
+          .andWhere('isApproved = :approved', { approved: true })
+          .getRawMany(),
+      );
+    });
+    let result: Image[] = [];
+    await Promise.all(arrOfPromises).then((value) => {
+      value.forEach((el) => {
+        result = result.filter((image) => {
+          return !el.some((photo) => {
+            return image.id === photo.id;
+          });
+        });
+        result = result.concat(el);
+      });
+    });
+
+    result = result.sort((a, b) => +b.createdAt - +a.createdAt);
+    return { count: result.length, data: result };
   }
 }
