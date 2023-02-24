@@ -3,11 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { Image } from 'src/entity/image.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { User } from 'src/entity/user.entity';
 import { permutationsOfArray } from 'src/helpers/permutateArray.helper';
+import { paginate } from 'src/helpers/paginate.helper';
+import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
 
 @Injectable()
 export class ImagesService {
@@ -21,7 +23,7 @@ export class ImagesService {
   async uploadImages(
     images: Array<Express.Multer.File>,
     user: User,
-  ): Promise<{ data: { id: number; name: string; path: string }[] }> {
+  ): Promise<{ images: { id: number; name: string; path: string }[] }> {
     const arrOfPromies: Promise<Image>[] = [];
     const data = [];
     const watermark = await this.watermarksRepository.findOneBy({
@@ -54,13 +56,12 @@ export class ImagesService {
       data.push({
         id: photo.id,
         name: photo.name,
-        path: join(
-          process.env.BASE_URL,
+        path: makeUrlPath([
           'images',
           `${watermark.id}`,
           process.env.BASE_THUMBNAIL_SIZE,
           photo.name,
-        ),
+        ]),
       });
 
       const imagePath = join(__dirname, '../../uploads/images/', photo.name);
@@ -69,43 +70,75 @@ export class ImagesService {
       );
     });
 
-    return { data };
+    return { images: data };
   }
 
   async searchImages(
-    searchQuery: any,
-    userId: number | string = '%',
-  ): Promise<{ count: number; data: Image[] }> {
+    searchQuery = '',
+    page = 1,
+    perPage: number,
+    userId?: number | string,
+  ): Promise<{
+    count: number;
+    page: number;
+    perPage: number;
+    images: Image[];
+  }> {
     const params = searchQuery.split(' ');
     const arr = permutationsOfArray(params.slice(0, 3));
     const arrOfPromises: Promise<Image[]>[] = [];
+    const { limit, offset } = paginate(page, perPage);
+    const watermark = await this.watermarksRepository.findOneBy({
+      isDefault: true,
+    });
 
     arr.forEach((query) => {
       arrOfPromises.push(
-        this.imagesRepository
-          .createQueryBuilder('images')
-          .select('*')
-          .where('tags LIKE :query AND userId LIKE :userId', {
-            query,
-            userId,
-          })
-          .andWhere('isApproved = :approved', { approved: true })
-          .getRawMany(),
+        this.imagesRepository.find({
+          select: {
+            id: true,
+            name: true,
+            tags: true,
+            createdAt: true,
+            updatedAt: true,
+            user: { id: true, displayName: true },
+          },
+          where: {
+            tags: Like(query),
+            user: Like(userId ? userId : '%'),
+            isApproved: true,
+          },
+          relations: ['user'],
+        }),
       );
     });
-    let result: Image[] = [];
-    await Promise.all(arrOfPromises).then((value) => {
-      value.forEach((el) => {
+
+    let result = [];
+    await Promise.all(arrOfPromises).then((permutedOutput) => {
+      permutedOutput.forEach((arrOfImages) => {
         result = result.filter((image) => {
-          return !el.some((photo) => {
+          return !arrOfImages.some((photo) => {
             return image.id === photo.id;
           });
         });
-        result = result.concat(el);
+        result = result.concat(arrOfImages);
       });
     });
 
-    result = result.sort((a, b) => +b.createdAt - +a.createdAt);
-    return { count: result.length, data: result };
+    result.forEach((image) => {
+      image.path = makeUrlPath([
+        'images',
+        watermark.id,
+        process.env.BASE_THUMBNAIL_SIZE,
+        image.name,
+      ]);
+    });
+
+    const count = result.length;
+    result = result
+      .sort((a, b) => +b.createdAt - +a.createdAt)
+      .slice(offset, limit + offset);
+
+    return { count, page: +page, perPage: limit, images: result };
   }
 }
