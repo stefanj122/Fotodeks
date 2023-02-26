@@ -35,7 +35,7 @@ export class AuthService {
     };
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
-        delete newUser.password;
+      delete newUser.password;
       return {
         message: 'Successfully created',
         data: newUser,
@@ -46,11 +46,11 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(username);
-    return user && await bcrypt.compare(pass, user.password) ? user : null;
+    return user && (await bcrypt.compare(pass, user.password)) ? user : null;
   }
-    
+
   async login(user: JwtPayloadType) {
-    const payload= {
+    const payload = {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
