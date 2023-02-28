@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FileValidator } from 'src/config/fileValidator.config';
+import { FileValidator } from 'src/validators/file.validator';
 import { watermarksStorage } from 'src/config/multer.config';
 import { DeleteResult } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
@@ -45,7 +45,6 @@ export class WatermarksController {
     @UploadedFile(FileValidator)
     image: Express.Multer.File,
   ): Promise<any> {
-    console.log(createWatermarkDto);
     return this.watermarksService.create(createWatermarkDto, image);
   }
 

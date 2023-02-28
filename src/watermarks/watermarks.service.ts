@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { join } from 'path';
 import { Watermark } from 'src/entity/watermark.entity';
@@ -28,7 +28,7 @@ export class WatermarksService {
     const { name, ...watermark } = await this.watermarksRepository.findOneBy({
       id,
     });
-    const path = 'http://localhost:3000/watermarks/' + name;
+    const path = process.env.BASE_URL + '/watermarks/' + name;
     return {
       ...watermark,
       path,
@@ -45,8 +45,6 @@ export class WatermarksService {
     });
     if (watermark && watermark.isDefault === false) {
       return await this.watermarksRepository.delete(id);
-    } else {
-      throw new BadRequestException('Watermark cannot be deleted!');
     }
   }
 }
