@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Images } from 'src/entity/image.entity';
-import { Users } from 'src/entity/user.entity';
+import { Image } from 'src/entity/image.entity';
+import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
-    @InjectRepository(Images)
-    private readonly imagesRepository: Repository<Images>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Image)
+    private readonly imagesRepository: Repository<Image>,
   ) {}
 }

@@ -8,6 +8,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileValidator } from 'src/config/fileValidator.config';
 import { imagesStorage } from 'src/config/multer.config';
+import { GetUser } from 'src/decorator/get-user.decorator';
+import { User } from 'src/entity/user.entity';
 import { ImagesService } from './images.service';
 
 @ApiTags('images')
@@ -35,7 +37,8 @@ export class ImagesController {
   async uploadImages(
     @UploadedFiles(FileValidator)
     images: Express.Multer.File[],
+    @GetUser() user: User,
   ): Promise<{ data: { id: number; name: string; path: string }[] }> {
-    return await this.imagesService.uploadImages(images);
+    return await this.imagesService.uploadImages(images, user);
   }
 }
