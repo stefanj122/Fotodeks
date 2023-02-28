@@ -1,4 +1,4 @@
-export const permutationsOfArray = (arr): string[] => {
+export const permutationsOfArray = (arr: string[]): string[] => {
   if (arr.length <= 2)
     return arr.length === 2
       ? [`%${arr.join('%')}%`, `%${[arr[1], arr[0]].join('%')}%`]
