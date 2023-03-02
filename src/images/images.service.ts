@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { User } from 'src/entity/user.entity';
+import {  AddWatermark, watermarkFormating } from 'src/helpers/watermarkFormating.helpers';
 
 @Injectable()
 export class ImagesService {
@@ -63,9 +64,10 @@ export class ImagesService {
       });
 
       const imagePath = join(__dirname, '../../uploads/images/', photo.name);
-      sharpHelper(imagePath, watermarkPath).toFile(
-        join(thumbnailPath, photo.name),
-      );
+      // sharpHelper(imagePath, watermarkPath).toFile(
+      //   join(thumbnailPath, photo.name),
+      // );
+    AddWatermark(50 ,imagePath, watermarkPath, join(thumbnailPath, photo.name), "center" );
     });
 
     return { data };

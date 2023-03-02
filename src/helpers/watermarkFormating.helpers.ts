@@ -1,65 +1,64 @@
 import * as sharp from 'sharp';
               
-//             export async function watermarkFormating(
-//                 watermarkOpacity: number, outputImagePath: string) {
+            export async function watermarkFormating(
+                watermarkOpacity: number, outputImagePath: string, imagePath: string, watermarkPath: string){
                 
-//                 const originalImage = sharp(process.env.IMAGE_PATH);
-//                 const watermark = sharp(process.env.WATERMARK_PATH);
+                const originalImage = sharp(imagePath);
+                const watermark = sharp(watermarkPath);
             
-//                 originalImage.metadata()
-//                     .then(metadata => {
-//                         return watermark
-//                             .resize(metadata.width * 0.2)    
-//                             .composite([{
-//                                 channels: 4,
-//                                 background: { r: 0, g: 0, b: 0, alpha: watermarkOpacity }
-//                             }])
-//                             // .ensureAlpha(watermarkOpacity)
-//                             .toBuffer();
-//                     }).then(watermarkBuffer => {
-//                         return originalImage
-//                             .composite([
-//                                 {
-//                                     input: watermarkBuffer,
-//                                     gravity: 'southeast',
-//                                 },
-//                             ])
-//                             .toFile(outputImagePath);
-//                     })
-//                     .catch(error => {
-//                         console.log(error, "Error creating watermark!");
-//                     });
-//             }
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+                originalImage.metadata()
+                    .then(metadata => {
+                        return watermark
+                            .resize(metadata.width * 0.2, metadata.height * 0.2)    
+                            .flatten()
+                            .ensureAlpha(watermarkOpacity)
+                            .toBuffer();
+                    }).then(watermarkBuffer => {
+                        return originalImage
+                            .composite([
+                                {
+                                    input: watermarkBuffer,
+                                    gravity: 'southeast',
 
-// export const AddWatermark = createParamDecorator(async (data: any, ctx: ExecutionContext) => {
-//   const request = ctx.switchToHttp().getRequest();
+                                },
+                            ])
+                            .toFile(outputImagePath);
+                    })
+                    .catch(error => {
+                        console.log(error, "Error creating watermark!");
+                    });
+}
 
-//   // Get the image buffer from the request
-//   const imageBuffer = request.file.buffer;
 
-//   // Create a new image object with the same dimensions
-  export async function AddWatermark(watermarkOpacity: number, outputImagePath: string){      
-    const image = sharp(process.env.IMAGE_PATH).toBuffer();
-    const metadata = await image.metadata();
-    const newImage = sharp({
-        create: {
-          width: metadata.width,
-          height: metadata.height,
-          channels: 4, 
-         background: { r: 0, g: 0, b: 0, alpha: watermarkOpacity }
-        }
-      });
+            
+
+export async function AddWatermark(watermarkOpacity: number, imagePath: string, watermarkPath: string, outputImagePath: string,
+    watermarkPosition: string) {
     
-      newImage.composite([{ input: image }]);   
+    const imageMeta = await sharp(imagePath).metadata();
+    const watermarkBuffer = await sharp(watermarkPath).resize({
+        width: 285,
+        height: 190,
+        fit: sharp.fit.inside
+    }).composite([{
+        input: Buffer.from([255, 255, 255, watermarkOpacity]),
+        raw: {
+            width: 1,
+            height: 1,
+            channels: 4
+        },
+        tile: true,
+        blend: 'dest-in'
+    }])
+        .png()
+        .toBuffer();
+
+    const newImage = await sharp(imagePath)
+        .resize(285, 190)
+        .composite([{
+            input: watermarkBuffer,
+            gravity: watermarkPosition
+        }]).toBuffer();
     
-      const watermarkBuffer = await sharp(process.env.WATERMARK_PATH).toBuffer();
-      
-      newImage.composite([{
-          input: watermarkBuffer,
-          gravity: 'southeast'
-      }]);
-  
-      const outputBuffer = await newImage.toBuffer();
-  return outputBuffer.toFile(outputImagePath);
+    await sharp(newImage).toFile(outputImagePath);
 }
