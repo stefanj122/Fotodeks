@@ -35,9 +35,9 @@ export class UserController {
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) userId: number,
-    @Body() userDto: UserDto,
+    @Body() updateUserDto: UserDto,
   ) {
-    return await this.userService.updateUser(userId, userDto);
+    return await this.userService.updateUser(userId, updateUserDto);
   }
 
   @Delete('/:id')
