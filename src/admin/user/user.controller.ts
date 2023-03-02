@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/authentification/dto/registerUser.dto';
+import { UpdateUserDto } from './update-user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('admin-user')
@@ -35,7 +36,7 @@ export class UserController {
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) userId: number,
-    @Body() updateUserDto: UserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     return await this.userService.updateUser(userId, updateUserDto);
   }
