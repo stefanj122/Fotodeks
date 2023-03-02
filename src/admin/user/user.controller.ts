@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Put, Post, Delete} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Put,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/authentification/dto/registerUser.dto';
 import { UserService } from './user.service';
 
-@ApiTags('user')
-@Controller('/user')
+@ApiTags('admin-user')
+@Controller('/admin/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -14,21 +23,20 @@ export class UserController {
   }
 
   @Get('/:id')
-  async getSingleUser(
-    @Param('id', ParseIntPipe) userId: number) {
+  async getSingleUser(@Param('id', ParseIntPipe) userId: number) {
     return await this.userService.getSingleUser(userId);
   }
 
   @Post()
-  async createUser(
-    @Body() userDto: UserDto) {
+  async createUser(@Body() userDto: UserDto) {
     return await this.userService.createUser(userDto);
   }
 
   @Put('/:id')
   async updateUser(
-    @Param('id', ParseIntPipe) userId: number, 
-    @Body() userDto: UserDto) {
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() userDto: UserDto,
+  ) {
     return await this.userService.updateUser(userId, userDto);
   }
 

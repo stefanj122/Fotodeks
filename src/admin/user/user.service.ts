@@ -21,15 +21,15 @@ export class UserService {
       .getRawOne();
   }
 
-  async getListOfUsers(): Promise<{count: number, data: User[]}> {
+  async getListOfUsers(): Promise<{ count: number; data: User[] }> {
     const [data, count] = await this.userRepository.findAndCount();
-    return {count, data};
+    return { count, data };
   }
 
   async getSingleUser(id: number): Promise<User> {
-    const user = await this.userRepository.findOne({where:{ id }});
+    const user = await this.userRepository.findOne({ where: { id } });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException('User not found!');
     }
     return user;
@@ -38,25 +38,21 @@ export class UserService {
   async createUser(user: UserDto) {
     const newUser = await this.userRepository.save(user);
 
-    if(newUser) {
-      return { message: 'User is created succesfully.', data: newUser};
-    } 
-    else {
-      throw new BadRequestException('User not created!');
+    if (newUser) {
+      return { message: 'User is created succesfully.', data: newUser };
     }
+    throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
     return await this.userRepository.update(id, dto);
-  } 
+  }
 
   async deleteUser(id: number): Promise<any> {
-
     const user = await this.userRepository.findOneBy({ id });
 
-    if(user) {
+    if (user) {
       return await this.userRepository.delete(user);
-    } else {
-      throw new BadRequestException("User does not exist!");
     }
+    throw new BadRequestException('User does not exist!');
   }
 }
