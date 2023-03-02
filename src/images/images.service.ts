@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
 import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
+import { paginate } from 'src/helpers/paginate.helper';
+import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { permutateSearch } from 'src/helpers/brackets.helper';
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
-import { User } from 'src/entity/user.entity';
-import {  AddWatermark, watermarkFormating } from 'src/helpers/watermarkFormating.helpers';
+
 
 @Injectable()
 export class ImagesService {
@@ -18,58 +20,66 @@ export class ImagesService {
     private readonly watermarksRepository: Repository<Watermark>,
   ) {}
 
-  async uploadImages(
-    images: Array<Express.Multer.File>,
-    user: User,
-  ): Promise<{ data: { id: number; name: string; path: string }[] }> {
-    const arrOfPromies: Promise<Image>[] = [];
-    const data = [];
+  async fetchImages(
+    searchQuery?: string,
+    page?: number,
+    perPage?: number,
+    sortBy?: Record<number, 'ASC' | 'DESC'>,
+  ) {
+    const images = [];
+    const { currentPage, offset, limit } = paginate(page, perPage);
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
-    const thumbnailPath = join(
-      __dirname,
-      '../../public/images',
-      `${watermark.id}`,
-      process.env.BASE_THUMBNAIL_SIZE,
-    );
-
     const watermarkPath = join(
       __dirname,
       '../../uploads/watermarks/',
       watermark.name,
     );
-    if (!existsSync(thumbnailPath)) {
-      mkdirSync(thumbnailPath, { recursive: true });
-    }
+    const [data, count] = await this.imagesRepository
+      .createQueryBuilder('images')
+      .leftJoinAndSelect('images.user', 'user')
+      .where('images.isApproved = :isApproved', { isApproved: true })
+      .andWhere(permutateSearch(searchQuery))
+      .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`)
+      .offset(offset)
+      .limit(limit)
+      .getManyAndCount();
 
-    images.forEach((image) => {
-      arrOfPromies.push(
-        this.imagesRepository.save({ name: image.filename, user }),
+    data.forEach(async (image) => {
+      if (image.user) {
+        delete image.user.password;
+      }
+      const thumbnailPath = join(
+        __dirname,
+        '../../public/images',
+        `${watermark.id}`,
+        process.env.BASE_THUMBNAIL_SIZE,
       );
-    });
-
-    const savedImages = await Promise.all(arrOfPromies);
-    savedImages.forEach((photo) => {
-      data.push({
-        id: photo.id,
-        name: photo.name,
-        path: join(
-          process.env.BASE_URL,
+      if (!existsSync(join(thumbnailPath, image.name))) {
+        mkdirSync(thumbnailPath, { recursive: true });
+        const imagePath = join(__dirname, '../../uploads/images/', image.name);
+        sharpHelper(imagePath, watermarkPath, join(thumbnailPath, image.name));
+      }
+      images.push({
+        ...image,
+        path: makeUrlPath([
           'images',
           `${watermark.id}`,
           process.env.BASE_THUMBNAIL_SIZE,
-          photo.name,
-        ),
+          image.name,
+        ]),
       });
-
-      const imagePath = join(__dirname, '../../uploads/images/', photo.name);
-      // sharpHelper(imagePath, watermarkPath).toFile(
-      //   join(thumbnailPath, photo.name),
-      // );
-    AddWatermark(50 ,imagePath, watermarkPath, join(thumbnailPath, photo.name), "center" );
     });
 
-    return { data };
+    return {
+      images,
+      meat: {
+        count,
+        currentPage,
+        perPage: limit,
+        sortBy: [sortBy[0], sortBy[1]],
+      },
+    };
   }
 }
