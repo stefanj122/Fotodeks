@@ -5,60 +5,45 @@ export const sharpHelper = async (
   watermarkPath: string,
   thumbnailPath: string,
   thumbanilSize = process.env.BASE_THUMBNAIL_SIZE,
-  opacity = 170, gravity = "southeast"
+  opacity = 170,
+  gravity = 'southeast',
 ) => {
   const [width, height] = thumbanilSize.split('x');
-  if (thumbanilSize === process.env.BASE_THUMBNAIL_SIZE) {
-  
-    const watermarkBuffer = await sharp(watermarkPath)
-      .resize(Math.floor(+width * 0.8), Math.floor(+height * 0.8))
-      .composite([
-        {
-          input: Buffer.from([255, 255, 255, opacity]),
-          raw: {
-            width: 1,
-            height: 1,
-            channels: 4,
-          },
-          tile: true,
-          gravity: 'center',
-          blend: 'dest-in',
+  const isSmallest = thumbanilSize === process.env.BASE_THUMBNAIL_SIZE;
+
+  const watermark = sharp(watermarkPath).resize(
+    +width * (isSmallest ? 0.8 : 0.2),
+    +height * (isSmallest ? 0.8 : 0.2),
+  );
+  if (isSmallest) {
+    watermark.composite([
+      {
+        input: Buffer.from([255, 255, 255, opacity]),
+        raw: {
+          width: 1,
+          height: 1,
+          channels: 4,
         },
-      ])
-      .png()
-      .toBuffer();
+        tile: true,
+        gravity: 'center',
+        blend: 'dest-in',
+      },
+    ]);
+  }
+  const watermarkBuffer = watermark.png().toBuffer();
 
-
-    return sharp(imagePath)
+  try {
+    await sharp(imagePath)
       .resize(+width, +height)
       .composite([
         {
-          input: watermarkBuffer,
+          input: await watermarkBuffer,
+          gravity: isSmallest ? 'center' : gravity,
         },
       ])
       .toFile(thumbnailPath);
-  } else {
-    const originalImage = sharp(imagePath);
-    const watermark = sharp(watermarkPath);
-            
-    originalImage.metadata()
-      .then(metadata => {
-        return watermark
-          .resize(metadata.width * 0.2, metadata.height * 0.2)
-          .toBuffer();
-      }).then(watermarkBuffer => {
-        return originalImage
-          .composite([
-            {
-              input: watermarkBuffer,
-              gravity: gravity,
-
-            },
-          ])
-          .toFile(thumbnailPath);
-      })
-      .catch(error => {
-        console.log(error, "Error creating watermark!");
-      });
+    return true;
+  } catch (e) {
+    return false;
   }
 };

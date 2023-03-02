@@ -10,7 +10,6 @@ import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 
-
 @Injectable()
 export class ImagesService {
   constructor(
