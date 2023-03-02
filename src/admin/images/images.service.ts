@@ -69,7 +69,7 @@ export class ImagesService {
 
       const imagePath = join(__dirname, '../../../uploads/images/', photo.name);
 
-      sharpHelper(imagePath, watermarkPath, join(thumbnailPath, photo.name));
+      sharpHelper(imagePath, watermarkPath, join(thumbnailPath, photo.name), process.env.BASE_THUMBNAIL_SIZE);
     });
 
     return { images: data };
