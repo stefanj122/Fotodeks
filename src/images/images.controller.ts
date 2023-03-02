@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Post,
@@ -19,10 +20,11 @@ import { ImagesService } from './images.service';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Put()
-  async updateImageApprovalStatus(@Body() imagesData: { id: number; isApproved: boolean }[]) {
-    await this.imagesService.updateImageApprovalStatus(imagesData)
-    
+  @Put('images/Approval')
+  async updateImageApprovalStatus(
+    @Body() imagesData: { id: number; isApproved: boolean }[],
+  ) {
+    return await this.imagesService.updateImageApprovalStatus(imagesData);
   }
 
   @ApiConsumes('multipart/form-data')

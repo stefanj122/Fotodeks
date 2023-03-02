@@ -1,4 +1,8 @@
-import { Body, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -17,13 +21,23 @@ export class ImagesService {
     private readonly watermarksRepository: Repository<Watermark>,
   ) {}
 
-  async updateImageApprovalStatus(@Body() imagesData: { id: number; isApproved: boolean }[]){
-    const arrOfPromises = []
-    imagesData.forEach(element=>{
-      arrOfPromises.push(this.imagesRepository.update( element.id, {isApproved: element.isApproved}))
-      })
-    await Promise.all(arrOfPromises);
-    return "images updated";
+  async updateImageApprovalStatus(
+    imagesData: { id: number; isApproved: boolean }[],
+  ) {
+    const arrOfPromises = [];
+    imagesData.forEach((element) => {
+      arrOfPromises.push(
+        this.imagesRepository.update(element.id, {
+          isApproved: element.isApproved,
+        }),
+      );
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      return BadRequestException;
+    }
   }
 
   async uploadImages(
@@ -80,12 +94,3 @@ export class ImagesService {
     return { data };
   }
 }
-      
- 
-    
-
-                   
-
-
-
-    
