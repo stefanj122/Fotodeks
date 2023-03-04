@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Comment } from './comment.entity';
 import { Image } from './image.entity';
 import { Watermark } from './watermark.entity';
 
@@ -21,6 +22,9 @@ export class User {
 
   @OneToMany(() => Watermark, (watermarks) => watermarks.user)
   watermarks: Watermark[];
+
+  @OneToMany(() => Comment, (comments) => comments.user)
+  comments: Comment[];
 
   @Column({ type: 'varchar', length: 30 })
   firstName: string;

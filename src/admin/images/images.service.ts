@@ -28,7 +28,6 @@ export class ImagesService {
     images: Array<Express.Multer.File>,
     user: User,
   ): Promise<{ images: { id: number; name: string; path: string }[] }> {
-    const arrOfPromies: Promise<Image>[] = [];
     const data = [];
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,

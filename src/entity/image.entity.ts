@@ -4,9 +4,11 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Comment } from './comment.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'images' })
@@ -16,6 +18,9 @@ export class Image {
 
   @ManyToOne(() => User, (user) => user.images)
   user: User;
+
+  @OneToMany(() => Comment, (comments) => comments.image)
+  comments: Comment[];
 
   @Column({ type: 'uuid' })
   name: string;
