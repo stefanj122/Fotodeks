@@ -13,6 +13,7 @@ import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
 import { paginate } from 'src/helpers/paginate.helper';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
 
 @Injectable()
 export class ImagesService {
@@ -48,30 +49,41 @@ export class ImagesService {
       mkdirSync(thumbnailPath, { recursive: true });
     }
 
-    images.forEach((image) => {
-      arrOfPromies.push(
-        this.imagesRepository.save({ name: image.filename, user }),
+    for (const image of images) {
+      const imagePath = join(
+        __dirname,
+        '../../../uploads/images/',
+        image.filename,
       );
-    });
-
-    const savedImages = await Promise.all(arrOfPromies);
-    savedImages.forEach(async (photo) => {
-      data.push({
-        id: photo.id,
-        name: photo.name,
-        path: makeUrlPath([
-          'images',
-          `${watermark.id}`,
-          process.env.BASE_THUMBNAIL_SIZE,
-          photo.name,
-        ]),
-      });
-
-      const imagePath = join(__dirname, '../../../uploads/images/', photo.name);
-
-      sharpHelper(imagePath, watermarkPath, join(thumbnailPath, photo.name));
-    });
-
+      if (
+        await sharpHelper(
+          imagePath,
+          watermarkPath,
+          join(thumbnailPath, image.filename),
+        )
+      ) {
+        const photo = await this.imagesRepository.save({
+          name: image.filename,
+          user,
+        });
+        data.push({
+          id: photo.id,
+          name: photo.name,
+          path: makeUrlPath([
+            'images',
+            `${watermark.id}`,
+            process.env.BASE_THUMBNAIL_SIZE,
+            photo.name,
+          ]),
+        });
+      } else {
+        data.push({
+          name: image.originalname,
+          message: `${image.originalname} can not be uploaded!`,
+        });
+        fs.rmSync(image.path);
+      }
+    }
     return { images: data };
   }
 
