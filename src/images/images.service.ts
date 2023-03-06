@@ -36,7 +36,7 @@ export class ImagesService {
       await Promise.all(arrOfPromises);
       return 'success';
     } catch (error) {
-      return BadRequestException;
+      throw new BadRequestException;
     }
   }
 
