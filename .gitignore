@@ -4,7 +4,7 @@
 /uploads/images/*
 /uploads/watermarks/*
 /public/images/*
-/public/watermarks/*
+/public/watermarksStorage/*
 
 # Logs
 logs

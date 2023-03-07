@@ -9,7 +9,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { UserDto } from 'src/authentification/dto/registerUser.dto';
+import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { UserService } from './user.service';
 

@@ -44,7 +44,7 @@ export class WatermarksController {
     @Body() createWatermarkDto: CreateWatermarkDto,
     @UploadedFile(FileValidator)
     image: Express.Multer.File,
-  ): Promise<CreateWatermarkDto> {
+  ): Promise<CreateWatermarkType> {
     return await this.watermarksService.createWatermark(
       createWatermarkDto,
       image,
@@ -52,7 +52,7 @@ export class WatermarksController {
   }
 
   @Get('/:id')
-  async getSingle(@Param('id', ParseIntPipe) id: number) {
+  async getSingle(@Param('id', ParseIntPipe) id: number): Promise<CreateWatermarkType> {
     return await this.watermarksService.getSingle(id);
   }
 

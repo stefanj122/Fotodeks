@@ -6,6 +6,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
 import { CreateWatermarkType } from 'src/types/watermarkType';
+import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
 
 @Injectable()
 export class WatermarksService {
@@ -16,23 +17,29 @@ export class WatermarksService {
   async createWatermark(
     dto: CreateWatermarkDto,
     watermark: Express.Multer.File,
-  ) {
+  ):Promise<CreateWatermarkType> {
     fs.cpSync(
       watermark.path,
-      join(__dirname, '../../public/watermarks/' + watermark.filename),
+      join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
     );
-    return await this.watermarksRepository.save({
+    const newWatermark = await this.watermarksRepository.save({
       name: watermark.filename,
       description: dto.description,
     });
+    const path = makeUrlPath(['watermarksStorage', newWatermark.name]);
+    return {
+      ...newWatermark,
+      path,
+    };
   }
 
-  async getSingle(id: number) {
+  async getSingle(id: number): Promise<CreateWatermarkType> {
     const { name, ...watermark } = await this.watermarksRepository.findOneBy({
       id,
     });
-    const path = process.env.BASE_URL + '/watermarks/' + name;
+    const path = makeUrlPath(['watermarksStorage', name]);
     return {
+      name,
       ...watermark,
       path,
     };
