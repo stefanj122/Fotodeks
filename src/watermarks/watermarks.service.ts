@@ -19,8 +19,7 @@ export class WatermarksService {
   ) {
     fs.cpSync(
       watermark.path,
-      // join(__dirname, '../../public/watermarks/' + watermark.filename),
-      process.env.BASE_URL + '/public/watermarks/'  + watermark.filename,
+      join(__dirname, '../../public/watermarks/' + watermark.filename),
     );
     return await this.watermarksRepository.save({
       name: watermark.filename,
