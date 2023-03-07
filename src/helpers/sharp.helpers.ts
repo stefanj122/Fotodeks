@@ -6,12 +6,17 @@ export const sharpHelper = async (
   thumbnailPath: string,
   thumbanilSize = process.env.BASE_THUMBNAIL_SIZE,
   opacity = 170,
+  gravity = 'southeast',
 ) => {
   const [width, height] = thumbanilSize.split('x');
+  const isSmallest = thumbanilSize === process.env.BASE_THUMBNAIL_SIZE;
 
-  const watermarkBuffer = await sharp(watermarkPath)
-    .resize(285, 190)
-    .composite([
+  const watermark = sharp(watermarkPath).resize(
+    +width * (isSmallest ? 0.8 : 0.2),
+    +height * (isSmallest ? 0.8 : 0.2),
+  );
+  if (isSmallest) {
+    watermark.composite([
       {
         input: Buffer.from([255, 255, 255, opacity]),
         raw: {
@@ -23,16 +28,22 @@ export const sharpHelper = async (
         gravity: 'center',
         blend: 'dest-in',
       },
-    ])
-    .png()
-    .toBuffer();
+    ]);
+  }
+  const watermarkBuffer = watermark.png().toBuffer();
 
-  return sharp(imagePath)
-    .resize(+width, +height)
-    .composite([
-      {
-        input: watermarkBuffer,
-      },
-    ])
-    .toFile(thumbnailPath);
+  try {
+    await sharp(imagePath)
+      .resize(+width, +height)
+      .composite([
+        {
+          input: await watermarkBuffer,
+          gravity: isSmallest ? 'center' : gravity,
+        },
+      ])
+      .toFile(thumbnailPath);
+    return true;
+  } catch (e) {
+    return false;
+  }
 };

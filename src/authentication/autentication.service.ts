@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/admin/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayloadType } from 'src/types/payloadType';
+import { JwtPayloadType } from 'src/types/payload.type';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +30,8 @@ export class AuthService {
       throw new BadRequestException('Email or display name is in use!');
     }
     const preparedUser = {
-      ...user,
-      password: await bcrypt.hash(user.password, 10),
+      ...createUserDto,
+      password: await bcrypt.hash(createUserDto.password, 10),
     };
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
@@ -62,7 +62,7 @@ export class AuthService {
       data: user,
       access_token: this.jwtService.sign(payload, {
         privateKey: process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_EXPIRATION,
+        expiresIn: process.env.JWT_EXPIRATION_TIME,
       }),
     };
   }
