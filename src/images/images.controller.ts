@@ -7,11 +7,6 @@ import { ImagesService } from './images.service';
 @Controller('/images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
-  @Put()
-  async updateImagesTags(@Body() imagesDataTags: {id: number; tags: string}[]){
-    return await this.imagesService.updateImagesTags(imagesDataTags)
-  }
-
 
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false })

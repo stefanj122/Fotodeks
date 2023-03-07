@@ -18,19 +18,6 @@ export class ImagesService {
     @InjectRepository(Watermark)
     private readonly watermarksRepository: Repository<Watermark>,
   ) {}
-    async updateImagesTags(imagesDataTags: { id: number; tags: string} []){
-    const arrOfPromises = []
-    imagesDataTags.forEach((element) => {
-      arrOfPromises.push(this.imagesRepository.update(
-        element.id, {
-          tags: element.tags
-        })
-      );
-    })
-    try { await Promise.all(arrOfPromises)
-      return 'success'}
-      catch(error){throw new BadRequestException()}
-   }
 
   async fetchImages(
     searchQuery?: string,

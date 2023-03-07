@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
+  Put,
   Query,
   UploadedFiles,
   UseInterceptors,
@@ -19,6 +21,11 @@ import { ImagesService } from './images.service';
 @Controller('/admin/images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
+
+  @Put()
+  async updateImagesTags(@Body() imagesDataTags: {id: number; tags: string}[]){
+    return await this.imagesService.updateImagesTags(imagesDataTags)
+  }
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
