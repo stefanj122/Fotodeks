@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
+  Put,
   Query,
   UploadedFiles,
   UseInterceptors,
@@ -19,6 +21,13 @@ import { ImagesService } from './images.service';
 @Controller('/admin/images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
+
+  @Put('images/approval')
+  async updateImageApprovalStatus(
+    @Body() imagesData: { id: number; isApproved: boolean }[],
+  ) {
+    return await this.imagesService.updateImageApprovalStatus(imagesData);
+  }
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
