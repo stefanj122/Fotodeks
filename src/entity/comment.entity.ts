@@ -13,10 +13,10 @@ export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.comments)
+  @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Image, (image) => image.comments)
+  @ManyToOne(() => Image, (image) => image.comments, { onDelete: 'CASCADE' })
   image: Image;
 
   @Column()
