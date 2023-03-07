@@ -1,5 +1,4 @@
 import {
-  BadGatewayException,
   BadRequestException,
   Injectable,
 } from '@nestjs/common';
@@ -36,7 +35,7 @@ export class ImagesService {
       await Promise.all(arrOfPromises);
       return 'success';
     } catch (error) {
-      throw new BadRequestException;
+      throw new BadRequestException();
     }
   }
 
