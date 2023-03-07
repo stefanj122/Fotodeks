@@ -16,8 +16,8 @@ import { FileValidator } from 'src/validators/file.validator';
 import { watermarksStorage } from 'src/config/multer.config';
 import { DeleteResult } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
-import { UpdateWatermarkDto } from './dto/update-watermark.dto';
 import { WatermarksService } from './watermarks.service';
+import { CreateWatermarkType } from 'src/types/watermarkType';
 
 @ApiTags('Watermarks')
 @Controller('/watermarks')
@@ -38,33 +38,36 @@ export class WatermarksController {
       },
     },
   })
-  @Post('/')
+  @Post()
   @UseInterceptors(FileInterceptor('watermark', watermarksStorage))
-  async create(
+  async createWatermark(
     @Body() createWatermarkDto: CreateWatermarkDto,
     @UploadedFile(FileValidator)
     image: Express.Multer.File,
-  ): Promise<any> {
-    return this.watermarksService.create(createWatermarkDto, image);
+  ): Promise<CreateWatermarkDto> {
+    return await this.watermarksService.createWatermark(
+      createWatermarkDto,
+      image,
+    );
   }
 
   @Get('/:id')
   async getSingle(@Param('id', ParseIntPipe) id: number) {
-    return await this.watermarksService.get(id);
+    return await this.watermarksService.getSingle(id);
   }
 
   @Patch('/:id')
   async updateWatermark(
-    @Body() updateWatermarkDto: UpdateWatermarkDto,
+    @Body() updateWatermarkDto: CreateWatermarkDto,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.watermarksService.update(id, updateWatermarkDto);
+    return await this.watermarksService.updateWatermark(id, updateWatermarkDto);
   }
 
   @Delete('/:id')
   async deleteWatermark(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<DeleteResult> {
-    return await this.watermarksService.delete(id);
+    return await this.watermarksService.deleteWatermark(id);
   }
 }

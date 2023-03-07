@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { join } from 'path';
 import { Watermark } from 'src/entity/watermark.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
-import { UpdateWatermarkDto } from './dto/update-watermark.dto';
 import * as fs from 'fs';
+import { CreateWatermarkType } from 'src/types/watermarkType';
 
 @Injectable()
 export class WatermarksService {
@@ -13,10 +13,14 @@ export class WatermarksService {
     @InjectRepository(Watermark)
     private readonly watermarksRepository: Repository<Watermark>,
   ) {}
-  async create(dto: CreateWatermarkDto, watermark: Express.Multer.File) {
+  async createWatermark(
+    dto: CreateWatermarkDto,
+    watermark: Express.Multer.File,
+  ) {
     fs.cpSync(
       watermark.path,
-      join(__dirname, '../../public/watermarks/' + watermark.filename),
+      // join(__dirname, '../../public/watermarks/' + watermark.filename),
+      process.env.BASE_URL + '/public/watermarks/'  + watermark.filename,
     );
     return await this.watermarksRepository.save({
       name: watermark.filename,
@@ -24,7 +28,7 @@ export class WatermarksService {
     });
   }
 
-  async get(id: number) {
+  async getSingle(id: number) {
     const { name, ...watermark } = await this.watermarksRepository.findOneBy({
       id,
     });
@@ -35,16 +39,17 @@ export class WatermarksService {
     };
   }
 
-  async update(id: number, updateWatermarkDto: UpdateWatermarkDto) {
+  async updateWatermark(id: number, updateWatermarkDto: CreateWatermarkDto) {
     return await this.watermarksRepository.update(id, updateWatermarkDto);
   }
 
-  async delete(id: number): Promise<DeleteResult> {
+  async deleteWatermark(id: number): Promise<DeleteResult> {
     const watermark = await this.watermarksRepository.findOneBy({
       id,
     });
     if (watermark && watermark.isDefault === false) {
       return await this.watermarksRepository.delete(id);
     }
+    throw new BadRequestException('Watermark cannot be deleted!');
   }
 }
