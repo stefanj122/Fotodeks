@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
-import { AppController } from './app.controller';
+import { UserModule } from './admin/user/user.module';
 import { AppService } from './app.service';
+import { AuthModule } from './authentication/autentication.module';
 import { ImagesModule } from './images/images.module';
 import { WatermarksModule } from './watermarks/watermarks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -13,6 +14,7 @@ import { join } from 'path';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/*'],
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
@@ -30,8 +32,10 @@ import { join } from 'path';
     WatermarksModule,
     ImagesModule,
     AdminModule,
+    AuthModule,
+    UserModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [AppService],
 })
 export class AppModule {}
