@@ -50,9 +50,9 @@ export class UserService {
   async deleteUser(id: number): Promise<any> {
     const user = await this.userRepository.findOneBy({ id });
 
-    if (user) {
+    if (user && user.role !== 'admin') {
       return await this.userRepository.delete(user);
-    }
+    } 
     throw new BadRequestException('User does not exist!');
   }
 }
