@@ -1,8 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { join } from 'path';
 import { Watermark } from 'src/entity/watermark.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
 import { CreateWatermarkType } from 'src/types/watermarkType';
@@ -17,7 +21,7 @@ export class WatermarksService {
   async createWatermark(
     dto: CreateWatermarkDto,
     watermark: Express.Multer.File,
-  ):Promise<CreateWatermarkType> {
+  ): Promise<CreateWatermarkType> {
     fs.cpSync(
       watermark.path,
       join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
@@ -45,16 +49,30 @@ export class WatermarksService {
     };
   }
 
-  async updateWatermark(id: number, updateWatermarkDto: CreateWatermarkDto) {
-    return await this.watermarksRepository.update(id, updateWatermarkDto);
+  async updateWatermark(
+    id: number,
+    updateWatermarkDto: CreateWatermarkDto,
+  ): Promise<CreateWatermarkType> {
+    const watermark = await this.watermarksRepository.findOneBy({ id });
+    if (!watermark) {
+      throw new NotFoundException('Watermark not found!');
+    }
+    watermark.description = updateWatermarkDto.description;
+    await this.watermarksRepository.save(watermark);
+    const path = makeUrlPath(['watermarksStorage', watermark.name]);
+    return {
+      ...watermark,
+      path,
+    };
   }
 
-  async deleteWatermark(id: number): Promise<DeleteResult> {
+  async deleteWatermark(id: number) {
     const watermark = await this.watermarksRepository.findOneBy({
       id,
     });
     if (watermark && watermark.isDefault === false) {
-      return await this.watermarksRepository.delete(id);
+      await this.watermarksRepository.delete(id);
+      return {};
     }
     throw new BadRequestException('Watermark cannot be deleted!');
   }

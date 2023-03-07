@@ -9,12 +9,12 @@ import {
   UseInterceptors,
   Patch,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileValidator } from 'src/validators/file.validator';
 import { watermarksStorage } from 'src/config/multer.config';
-import { DeleteResult } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import { WatermarksService } from './watermarks.service';
 import { CreateWatermarkType } from 'src/types/watermarkType';
@@ -52,7 +52,9 @@ export class WatermarksController {
   }
 
   @Get('/:id')
-  async getSingle(@Param('id', ParseIntPipe) id: number): Promise<CreateWatermarkType> {
+  async getSingle(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CreateWatermarkType> {
     return await this.watermarksService.getSingle(id);
   }
 
@@ -60,14 +62,13 @@ export class WatermarksController {
   async updateWatermark(
     @Body() updateWatermarkDto: CreateWatermarkDto,
     @Param('id', ParseIntPipe) id: number,
-  ) {
+  ): Promise<CreateWatermarkType> {
     return await this.watermarksService.updateWatermark(id, updateWatermarkDto);
   }
 
   @Delete('/:id')
-  async deleteWatermark(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<DeleteResult> {
+  @HttpCode(204)
+  async deleteWatermark(@Param('id', ParseIntPipe) id: number) {
     return await this.watermarksService.deleteWatermark(id);
   }
 }
