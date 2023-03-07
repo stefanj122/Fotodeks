@@ -9,6 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('Fotodesk')
+    .addBearerAuth()
     .setDescription('Platform for uploads pictures')
     .setVersion('1.0')
     .addTag('fotodesk')
