@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './admin/user/user.module';
 import { AppService } from './app.service';
-import { AuthModule } from './authentification/autentication.module';
+import { AuthModule } from './authentication/autentication.module';
 import { ImagesModule } from './images/images.module';
 import { WatermarksModule } from './watermarks/watermarks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';

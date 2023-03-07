@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 import { IsBoolean, IsEmail } from 'class-validator';
 
-export class UserDto {
+export class UpdateUserDto {
   @ApiProperty()
   @IsString()
   firstName: string;
@@ -21,6 +21,7 @@ export class UserDto {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
     {
@@ -33,5 +34,4 @@ export class UserDto {
   @ApiProperty()
   @IsBoolean()
   isApproved: boolean;
-
 }
