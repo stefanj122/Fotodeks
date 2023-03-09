@@ -1,4 +1,4 @@
-import { Body, Put, Controller, Get, Query  } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SortByValidator } from 'src/validators/sortBy.validator';
 import { ImagesService } from './images.service';

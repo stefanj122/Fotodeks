@@ -24,19 +24,22 @@ export class ImagesService {
     private watermarksRepository: Repository<Watermark>,
   ) {}
 
-  async updateImagesTags(imagesDataTags: { id: number; tags: string} []){
-    const arrOfPromises = []
+  async updateImagesTags(imagesDataTags: { id: number; tags: string }[]) {
+    const arrOfPromises = [];
     imagesDataTags.forEach((element) => {
-      arrOfPromises.push(this.imagesRepository.update(
-        element.id, {
-          tags: element.tags
-        })
+      arrOfPromises.push(
+        this.imagesRepository.update(element.id, {
+          tags: element.tags,
+        }),
       );
-    })
-    try { await Promise.all(arrOfPromises)
-      return 'success'}
-      catch(error){throw new BadRequestException()}
-   }
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
   async updateImageApprovalStatus(
     imagesData: { id: number; isApproved: boolean }[],
   ) {

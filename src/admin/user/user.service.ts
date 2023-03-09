@@ -52,7 +52,7 @@ export class UserService {
 
     if (user && user.role !== 'admin') {
       return await this.userRepository.delete(user);
-    } 
+    }
     throw new BadRequestException('User does not exist!');
   }
 }

@@ -9,7 +9,7 @@ import {
   Post,
   Delete,
   ForbiddenException,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/authentication/dto/registerUser.dto';
@@ -25,14 +25,13 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(UserRoleGuard)
   @Get('/me')
-  async getCurrentUser(@GetUser() user){
-    if (user){
+  async getCurrentUser(@GetUser() user) {
+    if (user) {
       delete user.password;
       return user;
     }
     throw new ForbiddenException();
   }
-
 
   @Get()
   async getListOfUsers() {
