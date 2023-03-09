@@ -15,17 +15,28 @@ export class CommentsService {
     private readonly imagesRepository: Repository<Image>,
   ) {}
 
-  async createComment(comment: CreateCommentDto, user: User): Promise<Comment> {
+  async createComment(
+    createCommentDto: CreateCommentDto,
+    user: User,
+  ): Promise<Comment> {
     const image = await this.imagesRepository.findOne({
-      where: { id: comment.imageId, isApproved: true },
+      where: { id: createCommentDto.imageId, isApproved: true },
     });
+    const comment = await this.commentsRepository.findOne({
+      where: { id: createCommentDto.commentId, isApproved: true },
+      relations: ['user'],
+    });
+    if (!comment && createCommentDto.commentId) {
+      throw new NotFoundException('Comment not found');
+    }
     if (!image) {
       throw new NotFoundException('Image not found');
     }
     return await this.commentsRepository.save({
       user,
       image,
-      ...comment,
+      parent: comment,
+      ...createCommentDto,
     });
   }
 }
