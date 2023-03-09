@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Image } from './image.entity';
@@ -19,13 +20,21 @@ export class Comment {
   @ManyToOne(() => Image, (image) => image.comments, { onDelete: 'CASCADE' })
   image: Image;
 
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  children: Comment[];
+
+  @ManyToOne(() => Comment, (comment) => comment.children, {
+    onDelete: 'CASCADE',
+  })
+  parent: Comment;
+
   @Column()
   content: string;
 
   @Column()
   rate: number;
 
-  @Column()
+  @Column({ default: false })
   isApproved: boolean;
 
   @CreateDateColumn()

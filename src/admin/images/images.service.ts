@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -23,6 +23,25 @@ export class ImagesService {
     @InjectRepository(Watermark)
     private watermarksRepository: Repository<Watermark>,
   ) {}
+
+  async updateImageApprovalStatus(
+    imagesData: { id: number; isApproved: boolean }[],
+  ) {
+    const arrOfPromises = [];
+    imagesData.forEach((element) => {
+      arrOfPromises.push(
+        this.imagesRepository.update(element.id, {
+          isApproved: element.isApproved,
+        }),
+      );
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
 
   async uploadImages(
     images: Array<Express.Multer.File>,

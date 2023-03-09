@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class CreateCommentDto {
   @ApiProperty()
   @IsNumber()
   imageId: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  commentId: number;
 
   @ApiProperty()
   @IsNumber()

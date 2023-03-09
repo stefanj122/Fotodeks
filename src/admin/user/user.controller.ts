@@ -1,3 +1,4 @@
+import { GetUser } from 'src/decorator/get-user.decorator';
 import {
   Body,
   Controller,
@@ -7,16 +8,35 @@ import {
   Put,
   Post,
   Delete,
+  ForbiddenException,
+  UseGuards
 } from '@nestjs/common';
+<<<<<<< HEAD
 import { ApiTags } from '@nestjs/swagger';
+=======
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+>>>>>>> develop
 import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { UserService } from './user.service';
+import { UserRoleGuard } from 'src/authentication/user-role.guard';
 
 @ApiTags('admin-user')
 @Controller('/admin/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @ApiBearerAuth()
+  @UseGuards(UserRoleGuard)
+  @Get('/me')
+  async getCurrentUser(@GetUser() user){
+    if (user){
+      delete user.password;
+      return user;
+    }
+    throw new ForbiddenException();
+  }
+
 
   @Get()
   async getListOfUsers() {
