@@ -1,4 +1,12 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/get-user.decorator';
 import { Comment } from 'src/entity/comment.entity';
@@ -17,5 +25,14 @@ export class CommentsController {
     @Body() comment: CreateCommentDto,
   ): Promise<Comment> {
     return await this.commentsService.createComment(comment, user);
+  }
+
+  @Delete('/:id')
+  @HttpCode(204)
+  async deleteComment(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return await this.commentsService.deleteComment(id, user);
   }
 }
