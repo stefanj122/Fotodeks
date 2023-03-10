@@ -9,8 +9,8 @@ import { Watermark } from 'src/entity/watermark.entity';
 import { Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
-import { CreateWatermarkType } from 'src/types/watermarkType';
-import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { CreateWatermarkType } from 'src/types/watermark-type';
+import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 
 @Injectable()
 export class WatermarksService {
@@ -72,7 +72,7 @@ export class WatermarksService {
     });
     if (watermark && watermark.isDefault === false) {
       await this.watermarksRepository.delete(id);
-      return {};
+      return;
     }
     throw new BadRequestException('Watermark cannot be deleted!');
   }

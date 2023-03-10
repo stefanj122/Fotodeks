@@ -4,7 +4,7 @@ import { Comment } from 'src/entity/comment.entity';
 import { User } from 'src/entity/user.entity';
 import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
-import { CreateCommentDto } from './dto/createCommentDto.dto';
+import { CreateCommentDto } from './dto/create-comment-dto.dto';
 
 @Injectable()
 export class CommentsService {
@@ -24,7 +24,6 @@ export class CommentsService {
     });
     const comment = await this.commentsRepository.findOne({
       where: { id: createCommentDto.commentId, isApproved: true },
-      relations: ['user'],
     });
     if (!comment && createCommentDto.commentId) {
       throw new NotFoundException('Comment not found');

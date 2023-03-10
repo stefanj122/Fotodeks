@@ -1,10 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import { SortByValidator } from 'src/validators/sortBy.validator';
+import { Image } from 'src/entity/image.entity';
+import { Meta } from 'src/types/meta.type';
+import { SortByValidator } from 'src/validators/sort-by.validator';
 import { ImagesService } from './images.service';
 
-@ApiTags('images')
-@Controller('/images')
+@ApiTags('public-images')
+@Controller('/public/images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
@@ -17,8 +19,8 @@ export class ImagesController {
     @Query('search') searchQuery: string,
     @Query('page') page: number,
     @Query('perPage') perPage: number,
-    @Query('sortBy', SortByValidator) sortBy: Record<number, 'ASC' | 'DESC'>,
-  ) {
+    @Query('sortBy', SortByValidator) sortBy: [string, 'ASC' | 'DESC'],
+  ): Promise<{ images: Image[] & { path: string }[]; meta: Meta }> {
     return await this.imagesService.fetchImages(
       searchQuery,
       page,

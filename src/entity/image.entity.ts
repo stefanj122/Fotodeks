@@ -16,7 +16,7 @@ export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.images)
+  @ManyToOne(() => User, (user) => user.images, { onDelete: 'CASCADE' })
   user: User;
 
   @OneToMany(() => Comment, (comments) => comments.image)

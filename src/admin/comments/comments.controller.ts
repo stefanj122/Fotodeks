@@ -4,7 +4,7 @@ import { GetUser } from 'src/decorator/get-user.decorator';
 import { Comment } from 'src/entity/comment.entity';
 import { User } from 'src/entity/user.entity';
 import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/createCommentDto.dto';
+import { CreateCommentDto } from './dto/create-comment-dto.dto';
 
 @ApiTags('admin-comments')
 @Controller('/admin/comments')

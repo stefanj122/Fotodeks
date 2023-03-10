@@ -18,6 +18,7 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: UserDto) {
+    //use service from user service
     const user = await this.userRepository
       .createQueryBuilder('user')
       .select('*')
@@ -33,6 +34,7 @@ export class AuthService {
       ...createUserDto,
       password: await bcrypt.hash(createUserDto.password, 10),
     };
+    //handle if save doesn't work
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
       delete newUser.password;

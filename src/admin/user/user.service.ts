@@ -12,6 +12,7 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
+  //add input string or object
   async findOne(input: string): Promise<User | undefined> {
     return await this.userRepository
       .createQueryBuilder('user')
