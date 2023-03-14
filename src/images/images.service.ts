@@ -81,4 +81,7 @@ export class ImagesService {
       },
     };
   }
+  async findOneAndUpdate( id:number, isApproved:boolean ){
+    
+  }
 }
