@@ -26,8 +26,8 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(UserRoleGuard)
   @Get('/me')
-  async getCurrentUser(@GetUser() user) {
-    if(user) {
+  async getCurrentUser(@GetUser() user){
+    if (user){
       delete user.password;
       return user;
     }
