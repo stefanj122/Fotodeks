@@ -5,8 +5,6 @@ import { User } from 'src/entity/user.entity';
 import { Watermark } from 'src/entity/watermark.entity';
 import { ImagesService } from 'src/images/images.service';
 import { WatermarksModule } from 'src/admin/watermarks/watermarks.module';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
 import { CommentsModule } from './comments/comments.module';
 import { ImagesModule } from './images/images.module';
 import { UserModule } from './user/user.module';
@@ -19,7 +17,6 @@ import { UserModule } from './user/user.module';
     UserModule,
     WatermarksModule,
   ],
-  controllers: [AdminController],
-  providers: [AdminService, ImagesService],
+  providers: [ImagesService],
 })
 export class AdminModule {}

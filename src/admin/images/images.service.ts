@@ -15,6 +15,7 @@ import { sharpHelper } from 'src/helpers/sharp.helper';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class ImagesService {
@@ -127,14 +128,16 @@ export class ImagesService {
     page?: number,
     perPage?: number,
     userId?: number,
-    isApproved?: number,
-    sortBy?: [string, 'ASC' | 'DESC'],
+    isApproved?: boolean,
+    sortBy?: string,
   ): Promise<{ images: Array<Image & { path: string }>; meta: Meta }> {
     const images: Array<Image & { path: string }> = [];
     const { currentPage, offset, limit } = paginate(page, perPage);
     const imageColumns = this.imagesRepository.metadata.columns.map(
       (column) => column.propertyName,
     );
+    const [column, order] = sortByHelper(sortBy, imageColumns);
+
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
@@ -154,13 +157,12 @@ export class ImagesService {
       mkdirSync(thumbnailPath, { recursive: true });
     }
 
-    sortBy[0] = imageColumns.includes(sortBy[0]) ? sortBy[0] : 'id';
     const query = this.imagesRepository
       .createQueryBuilder('images')
       .leftJoinAndSelect('images.user', 'user')
       .where(filterByUserAndIsApproved(userId, isApproved))
       .andWhere(permutateSearch(searchQuery))
-      .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`);
+      .orderBy(`images.${column}`, `${order}`);
 
     const [data, count] = await query
       .offset(offset)
@@ -197,7 +199,7 @@ export class ImagesService {
         count,
         currentPage,
         perPage: limit,
-        sortBy,
+        sortBy: [column, order],
       },
     };
   }

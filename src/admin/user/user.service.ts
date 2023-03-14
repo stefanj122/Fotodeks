@@ -12,7 +12,6 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  //add input string or object
   async findOne(input: string): Promise<User | undefined> {
     return await this.userRepository
       .createQueryBuilder('user')
@@ -21,7 +20,6 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
-
   async getListOfUsers(): Promise<{ count: number; data: User[] }> {
     const [data, count] = await this.userRepository.findAndCount();
     return { count, data };

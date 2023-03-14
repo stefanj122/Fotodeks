@@ -2,7 +2,6 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Image } from 'src/entity/image.entity';
 import { Meta } from 'src/types/meta.type';
-import { SortByValidator } from 'src/validators/sort-by.validator';
 import { ImagesService } from './images.service';
 
 @ApiTags('public-images')
@@ -19,7 +18,7 @@ export class ImagesController {
     @Query('search') searchQuery: string,
     @Query('page') page: number,
     @Query('perPage') perPage: number,
-    @Query('sortBy', SortByValidator) sortBy: [string, 'ASC' | 'DESC'],
+    @Query('sortBy') sortBy: string,
   ): Promise<{ images: Image[] & { path: string }[]; meta: Meta }> {
     return await this.imagesService.fetchImages(
       searchQuery,
