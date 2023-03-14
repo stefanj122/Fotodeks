@@ -27,5 +27,5 @@ export class UserDto {
         'Password too week! Must contain minimum 6 characters, at least one UPPERCASE letter, one lowercase letter, one number and one special character!',
     },
   )
-  password: string;
+  password: string; 
 }
