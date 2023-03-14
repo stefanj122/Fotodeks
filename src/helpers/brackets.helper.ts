@@ -14,10 +14,10 @@ export const permutateSearch = (searchQuery: string): Brackets => {
 
 export const filerByUserAndIsApprved = (
   userId: number,
-  isApproved: number,
+  isApproved: boolean,
 ): Brackets => {
   return new Brackets((query) => {
-    if (isApproved) {
+    if (isApproved !== undefined) {
       query.where('images.isApproved = :isApproved', { isApproved });
     }
     if (userId) {

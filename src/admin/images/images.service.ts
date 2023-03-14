@@ -126,7 +126,7 @@ export class ImagesService {
     page?: number,
     perPage?: number,
     userId?: number,
-    isApproved?: number,
+    isApproved?: boolean,
     sortBy?: Record<number, 'ASC' | 'DESC'>,
   ) {
     const images: Array<Image & { path: string }> = [];

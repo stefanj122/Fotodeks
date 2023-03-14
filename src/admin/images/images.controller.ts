@@ -29,7 +29,7 @@ export class ImagesController {
     return await this.imagesService.updateImagesTags(imagesDataTags);
   }
 
-  @Put('images/approval')
+  @Put('/approval')
   async updateImageApprovalStatus(
     @Body() imagesData: { id: number; isApproved: boolean }[],
   ) {
@@ -73,7 +73,7 @@ export class ImagesController {
     @Query('userId') userId: number,
     @Query('page') page: number,
     @Query('perPage') perPage: number,
-    @Query('isApproved') isApproved: number,
+    @Query('isApproved') isApproved: boolean,
     @Query('sortBy', SortByValidator) sortBy: Record<string, 'ASC' | 'DESC'>,
   ) {
     return await this.imagesService.fetchImages(
