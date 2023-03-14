@@ -12,7 +12,6 @@ import { CreateCommentDto } from './dto/createCommentDto.dto';
 
 @Injectable()
 export class CommentsService {
-  [x: string]: any;
   constructor(
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
