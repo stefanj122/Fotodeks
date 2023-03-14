@@ -10,7 +10,7 @@ import {
   Delete,
   ForbiddenException,
   UseGuards,
-  HttpCode,
+  HttpCode
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,12 +27,13 @@ export class UserController {
   @UseGuards(UserRoleGuard)
   @Get('/me')
   async getCurrentUser(@GetUser() user) {
-    if (user) {
+    if(user) {
       delete user.password;
       return user;
     }
     throw new ForbiddenException();
   }
+
 
   @Get()
   async getListOfUsers() {
