@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { User } from 'src/entity/user.entity';
@@ -8,6 +12,7 @@ import { CreateCommentDto } from './dto/createCommentDto.dto';
 
 @Injectable()
 export class CommentsService {
+  [x: string]: any;
   constructor(
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
@@ -38,5 +43,22 @@ export class CommentsService {
       parent: comment,
       ...createCommentDto,
     });
+  }
+
+  async approvalComments(commentsData: { id: number; isApproved: boolean }[]) {
+    const arrOfPromises = [];
+    commentsData.forEach((element) => {
+      arrOfPromises.push(
+        this.commentsRepository.update(element.id, {
+          isApproved: element.isApproved,
+        }),
+      );
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 }

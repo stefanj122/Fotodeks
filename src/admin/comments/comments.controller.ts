@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/decorator/get-user.decorator';
 import { Comment } from 'src/entity/comment.entity';
@@ -17,5 +17,11 @@ export class CommentsController {
     @Body() comment: CreateCommentDto,
   ): Promise<Comment> {
     return await this.commentsService.createComment(comment, user);
+  }
+  @Put('/approval')
+  async approvalComments(
+    @Body() commentsData: { id: number; isApproved: boolean }[],
+  ) {
+    return this.commentsService.approvalComments(commentsData);
   }
 }

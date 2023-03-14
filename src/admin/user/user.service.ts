@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,11 +47,11 @@ export class UserService {
     return await this.userRepository.update(id, dto);
   }
 
-  async deleteUser(id: number): Promise<any> {
+  async deleteUser(id: number): Promise<void> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (user && user.role !== 'admin') {
-      return await this.userRepository.delete(user);
+      await this.userRepository.delete(user);
     }
     throw new BadRequestException('User does not exist!');
   }
