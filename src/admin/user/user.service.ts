@@ -4,6 +4,7 @@ import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -35,8 +36,11 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: CreateUserDto) {
-    
+  async createUser(dto: CreateUserDto) {
+    const user = {
+      ...dto,
+      password: await bcrypt.hash(dto.password, 10),
+    };
 
     const newUser = await this.userRepository.save(user);
 
@@ -46,6 +50,12 @@ export class UserService {
     throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
+    if(dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10)
+    } else {
+      delete dto.password;
+    }
+
     return await this.userRepository.update(id, dto);
   }
 
