@@ -4,11 +4,13 @@ import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
 import { Watermark } from 'src/entity/watermark.entity';
 import { paginate } from 'src/helpers/paginate.helper';
-import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 import { permutateSearch } from 'src/helpers/brackets.helper';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { sharpHelper } from 'src/helpers/sharp.helpers';
+import { sharpHelper } from 'src/helpers/sharp.helper';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class ImagesService {
@@ -23,9 +25,14 @@ export class ImagesService {
     searchQuery?: string,
     page?: number,
     perPage?: number,
-    sortBy?: Record<number, 'ASC' | 'DESC'>,
-  ) {
-    const images = [];
+    sortBy?: string,
+  ): Promise<{ images: Array<Image & { path: string }>; meta: Meta }> {
+    const images: Array<Image & { path: string }> = [];
+    const imageColumns = this.imagesRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, imageColumns);
+
     const { currentPage, offset, limit } = paginate(page, perPage);
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
@@ -35,28 +42,31 @@ export class ImagesService {
       '../../uploads/watermarks/',
       watermark.name,
     );
+
+    const thumbnailPath = join(
+      __dirname,
+      '../../public/images',
+      `${watermark.id}`,
+      process.env.BASE_THUMBNAIL_SIZE,
+    );
+    if (!existsSync(thumbnailPath)) {
+      mkdirSync(thumbnailPath, { recursive: true });
+    }
+
     const [data, count] = await this.imagesRepository
       .createQueryBuilder('images')
       .leftJoinAndSelect('images.user', 'user')
       .where('images.isApproved = :isApproved', { isApproved: true })
       .andWhere(permutateSearch(searchQuery))
-      .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`)
+      .orderBy(`images.${column}`, `${order}`)
       .offset(offset)
       .limit(limit)
       .getManyAndCount();
 
     data.forEach(async (image) => {
-      if (image.user) {
-        delete image.user.password;
-      }
-      const thumbnailPath = join(
-        __dirname,
-        '../../public/images',
-        `${watermark.id}`,
-        process.env.BASE_THUMBNAIL_SIZE,
-      );
+      delete image.user.password;
+
       if (!existsSync(join(thumbnailPath, image.name))) {
-        mkdirSync(thumbnailPath, { recursive: true });
         const imagePath = join(__dirname, '../../uploads/images/', image.name);
         sharpHelper(imagePath, watermarkPath, join(thumbnailPath, image.name));
       }
@@ -73,11 +83,11 @@ export class ImagesService {
 
     return {
       images,
-      meat: {
+      meta: {
         count,
         currentPage,
         perPage: limit,
-        sortBy: [sortBy[0], sortBy[1]],
+        sortBy: [column, order],
       },
     };
   }

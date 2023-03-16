@@ -21,7 +21,6 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
-
   async getListOfUsers(): Promise<{ count: number; data: User[] }> {
     const [data, count] = await this.userRepository.findAndCount();
     return { count, data };
