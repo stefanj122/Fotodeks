@@ -49,8 +49,8 @@ export class UserService {
     throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
-    if(dto.password) {
-      dto.password = await bcrypt.hash(dto.password, 10)
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10);
     } else {
       delete dto.password;
     }
