@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,6 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
-
   async getListOfUsers(): Promise<{ count: number; data: User[] }> {
     const [data, count] = await this.userRepository.findAndCount();
     return { count, data };
@@ -35,7 +35,12 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: UserDto) {
+  async createUser(dto: CreateUserDto) {
+    const user = {
+      ...dto,
+      password: await bcrypt.hash(dto.password, 10),
+    };
+
     const newUser = await this.userRepository.save(user);
 
     if (newUser) {
@@ -44,14 +49,20 @@ export class UserService {
     throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10);
+    } else {
+      delete dto.password;
+    }
+
     return await this.userRepository.update(id, dto);
   }
 
-  async deleteUser(id: number): Promise<any> {
+  async deleteUser(id: number): Promise<void> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (user && user.role !== 'admin') {
-      return await this.userRepository.delete(user);
+      await this.userRepository.delete(user);
     }
     throw new BadRequestException('User does not exist!');
   }

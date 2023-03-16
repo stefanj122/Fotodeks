@@ -4,12 +4,12 @@ export const sharpHelper = async (
   imagePath: string,
   watermarkPath: string,
   thumbnailPath: string,
-  thumbanilSize = process.env.BASE_THUMBNAIL_SIZE,
-  opacity = 170,
+  thumbnailSize = process.env.BASE_THUMBNAIL_SIZE,
+  opacity = process.env.BASE_OPACITY,
   gravity = 'southeast',
 ) => {
-  const [width, height] = thumbanilSize.split('x');
-  const isSmallest = thumbanilSize === process.env.BASE_THUMBNAIL_SIZE;
+  const [width, height] = thumbnailSize.split('x');
+  const isSmallest = thumbnailSize === process.env.BASE_THUMBNAIL_SIZE;
 
   const watermark = sharp(watermarkPath).resize(
     +width * (isSmallest ? 0.8 : 0.2),
@@ -18,7 +18,7 @@ export const sharpHelper = async (
   if (isSmallest) {
     watermark.composite([
       {
-        input: Buffer.from([255, 255, 255, opacity]),
+        input: Buffer.from([255, 255, 255, +opacity]),
         raw: {
           width: 1,
           height: 1,

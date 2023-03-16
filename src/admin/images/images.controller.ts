@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  ParseBoolPipe,
   Post,
   Put,
   Query,
@@ -12,9 +13,10 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { imagesStorage } from 'src/config/multer.config';
 import { GetUser } from 'src/decorator/get-user.decorator';
+import { Image } from 'src/entity/image.entity';
 import { User } from 'src/entity/user.entity';
+import { Meta } from 'src/types/meta.type';
 import { FileValidator } from 'src/validators/file.validator';
-import { SortByValidator } from 'src/validators/sortBy.validator';
 import { ImagesService } from './images.service';
 
 @ApiTags('admin-images')
@@ -29,7 +31,7 @@ export class ImagesController {
     return await this.imagesService.updateImagesTags(imagesDataTags);
   }
 
-  @Put('images/approval')
+  @Put('/approval')
   async updateImageApprovalStatus(
     @Body() imagesData: { id: number; isApproved: boolean }[],
   ) {
@@ -73,14 +75,14 @@ export class ImagesController {
     @Query('userId') userId: number,
     @Query('page') page: number,
     @Query('perPage') perPage: number,
-    @Query('isApproved') isApproved: number,
-    @Query('sortBy', SortByValidator) sortBy: Record<string, 'ASC' | 'DESC'>,
-  ) {
+    @Query('isApproved', ParseBoolPipe) isApproved: boolean,
+    @Query('sortBy') sortBy: string,
+  ): Promise<{ images: Image[] & { path: string }[]; meta: Meta }> {
     return await this.imagesService.fetchImages(
       searchQuery,
       page,
       perPage,
-      userId,
+      +userId,
       isApproved,
       sortBy,
     );

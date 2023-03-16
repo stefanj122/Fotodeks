@@ -10,12 +10,13 @@ import {
   Delete,
   ForbiddenException,
   UseGuards,
+  HttpCode
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserDto } from 'src/authentication/dto/registerUser.dto';
-import { UpdateUserDto } from './update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { UserRoleGuard } from 'src/authentication/user-role.guard';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('admin-user')
 @Controller('/admin/user')
@@ -44,7 +45,7 @@ export class UserController {
   }
 
   @Post()
-  async createUser(@Body() userDto: UserDto) {
+  async createUser(@Body() userDto: CreateUserDto) {
     return await this.userService.createUser(userDto);
   }
 
@@ -57,7 +58,8 @@ export class UserController {
   }
 
   @Delete('/:id')
-  async deleteUser(@Param('id', ParseIntPipe) userId: number) {
+  @HttpCode(204)
+  async deleteUser(@Param('id', ParseIntPipe) userId: number): Promise<void> {
     return await this.userService.deleteUser(userId);
   }
 }

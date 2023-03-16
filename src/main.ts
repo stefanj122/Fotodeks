@@ -7,16 +7,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Fotodesk')
     .addBearerAuth()
-    .setDescription('Platform for uploads pictures')
-    .setVersion('1.0')
+    .setDescription('Platform for uploading pictures')
+    .setVersion('2.0')
     .addTag('fotodesk')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/docs', app, document);
 
-  await app.listen(3000);
+  await app.listen(process.env.APP_PORT);
 }
 bootstrap();
