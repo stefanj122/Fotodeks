@@ -22,6 +22,13 @@ import { ImagesService } from './images.service';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
+  @Put('/tags')
+  async updateImagesTags(
+    @Body() imagesDataTags: { id: number; tags: string }[],
+  ) {
+    return await this.imagesService.updateImagesTags(imagesDataTags);
+  }
+
   @Put('images/approval')
   async updateImageApprovalStatus(
     @Body() imagesData: { id: number; isApproved: boolean }[],
