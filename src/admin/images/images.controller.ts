@@ -98,6 +98,7 @@ export class ImagesController {
       sortBy,
     );
   }
+  
   @ApiBearerAuth()
   @UseGuards(UserRoleGuard)
   @ApiQuery({
