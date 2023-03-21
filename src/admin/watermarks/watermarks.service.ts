@@ -22,10 +22,14 @@ export class WatermarksService {
     dto: CreateWatermarkDto,
     watermark: Express.Multer.File,
   ): Promise<CreateWatermarkType> {
-    fs.cpSync(
-      watermark.path,
-      join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
-    );
+    if (fs.existsSync(watermark.path)) {
+      fs.cpSync(
+        watermark.path,
+        join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
+      );
+    } else {
+      throw new NotFoundException('Watermark does not exist');
+    }
     const newWatermark = await this.watermarksRepository.save({
       name: watermark.filename,
       description: dto.description,

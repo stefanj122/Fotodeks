@@ -20,14 +20,15 @@ import { UserRoleGuard } from 'src/authentication/user-role.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from 'src/entity/user.entity';
 import { Meta } from 'src/types/meta.type';
+import { Roles } from 'src/decorator/role.decorator';
 
 @ApiTags('admin-user')
+@ApiBearerAuth()
+@UseGuards(UserRoleGuard)
 @Controller('/admin/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiBearerAuth()
-  @UseGuards(UserRoleGuard)
   @Get('/me')
   async getCurrentUser(@GetUser() user) {
     if (user) {
@@ -54,6 +55,7 @@ export class UserController {
     return await this.userService.getSingleUser(userId);
   }
 
+  @Roles('admin')
   @Post()
   async createUser(@Body() userDto: CreateUserDto) {
     return await this.userService.createUser(userDto);
@@ -67,6 +69,7 @@ export class UserController {
     return await this.userService.updateUser(userId, updateUserDto);
   }
 
+  @Roles('admin')
   @Delete('/:id')
   @HttpCode(204)
   async deleteUser(@Param('id', ParseIntPipe) userId: number): Promise<void> {
