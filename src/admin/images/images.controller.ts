@@ -9,10 +9,19 @@ import {
   Put,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UserRoleGuard } from 'src/authentication/user-role.guard';
 import { imagesStorage } from 'src/config/multer.config';
 import { GetUser } from 'src/decorator/get-user.decorator';
 import { Image } from 'src/entity/image.entity';
@@ -89,7 +98,13 @@ export class ImagesController {
       sortBy,
     );
   }
-  @Get('download/:image/')
+  @ApiBearerAuth()
+  @UseGuards(UserRoleGuard)
+  @ApiQuery({
+    name: 'watermarkId',
+    required: false,
+  })
+  @Get('download/:imageId')
   async downloadImage(
     @Param('imageId', ParseIntPipe) imageID: number,
     @Query('watermarkId') watermarkId: number | undefined,

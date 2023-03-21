@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -209,30 +209,19 @@ export class ImagesService {
     user: User,
     watermarkId?: number | undefined,
   ) {
-    const sizeOfImages = ['800x600', '1280x720', '1920x1080'];
-    if (!sizeOfImages.includes(imageSize)) {
+    const sizeOfImage = ['800x600', '640x480', '1920x1080'];
+    if (!sizeOfImage.includes(imageSize)) {
       throw new BadRequestException('Image size is not supported!');
     }
 
-    //  if (user.role === 'admin') {
-    //     const watermark = await this.watermarksRepository.findOneBy({ id : watermarkId });
-    //  }else{
-    //   const watermark = await this.watermarksRepository.findOneBy({ isDefault: true });
-    // }
-    const watermark = await this.watermarksRepository.findOne({
-      where:
-        user.role === 'admin' && watermarkId
-          ? { id: watermarkId }
-          : { isDefault: true },
-    });
-    // const watermarkQwery = await this.watermarksRepository.createQueryBuilder('watermark')
+    const watermark =
+      user.role === 'admin' && watermarkId
+        ? await this.watermarksRepository.findOneBy({ id: watermarkId })
+        : await this.watermarksRepository.findOneBy({ isDefault: true });
 
-    // if(user.role === 'admin' && watermarkId){
-    //   const watermark1 = watermarkQwery.where('id = :watermarkId',{ watermarkId}).getOne();
-    // } else {
-    //   const watermark1 = watermarkQwery.where('isDefault = :isDefault', { isDefault: true }).getOne();
-    // }
-
+    if (!watermark) {
+      throw new NotFoundException('Watermark not found!');
+    }
     const watermarkPath = join(
       __dirname,
       '../../../uploads/watermarks/',
@@ -242,17 +231,27 @@ export class ImagesService {
       id: imageID,
       isApproved: true,
     });
+    if (!image) {
+      throw new NotFoundException('Watermark not found!');
+    }
     const imagePath = join(__dirname, '../../../uploads/images/', image.name);
     const thumbnailPath = join(
       __dirname,
-      '../../public/images',
+      '../../../public/images',
       `${watermark.id}`,
-      process.env.BASE_THUMBNAIL_SIZE,
+      imageSize,
     );
     if (!existsSync(thumbnailPath)) {
       mkdirSync(thumbnailPath, { recursive: true });
     }
-    if (await sharpHelper(imagePath, watermarkPath, thumbnailPath, imageSize)) {
+    if (
+      await sharpHelper(
+        imagePath,
+        watermarkPath,
+        join(thumbnailPath, image.name),
+        imageSize,
+      )
+    ) {
       return {
         path: makeUrlPath(['images', `${watermark.id}`, imageSize, image.name]),
       };
