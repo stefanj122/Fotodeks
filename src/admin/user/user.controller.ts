@@ -10,7 +10,8 @@ import {
   Delete,
   ForbiddenException,
   UseGuards,
-  HttpCode
+  HttpCode,
+  Query
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -35,8 +36,8 @@ export class UserController {
   }
 
   @Get()
-  async getListOfUsers() {
-    return await this.userService.getListOfUsers();
+  async getListOfUsers(@Query('page') page: number, @Query('perPage') perPage: number) {
+    return await this.userService.getListOfUsers(page, perPage);
   }
 
   @Get('/:id')
@@ -62,4 +63,5 @@ export class UserController {
   async deleteUser(@Param('id', ParseIntPipe) userId: number): Promise<void> {
     return await this.userService.deleteUser(userId);
   }
+  
 }
