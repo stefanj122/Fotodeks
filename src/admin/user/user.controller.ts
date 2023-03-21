@@ -10,7 +10,7 @@ import {
   Delete,
   ForbiddenException,
   UseGuards,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';

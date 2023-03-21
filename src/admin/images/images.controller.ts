@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   ParseBoolPipe,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -85,6 +87,20 @@ export class ImagesController {
       +userId,
       isApproved,
       sortBy,
+    );
+  }
+  @Get('download/:image/')
+  async downloadImage(
+    @Param('imageId', ParseIntPipe) imageID: number,
+    @Query('watermarkId') watermarkId: number | undefined,
+    @Query('imageSize') imageSize: string,
+    @GetUser() user: User,
+  ) {
+    return await this.imagesService.downloadImage(
+      imageID,
+      imageSize,
+      user,
+      watermarkId,
     );
   }
 }

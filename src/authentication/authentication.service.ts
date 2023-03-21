@@ -33,14 +33,15 @@ export class AuthService {
       ...createUserDto,
       password: await bcrypt.hash(createUserDto.password, 10),
     };
+    try{
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
       delete newUser.password;
-      return {
-        message: 'Successfully created',
-        data: newUser,
-        access_token: await this.login(newUser),
-      };
+      return await this.login(newUser)
+    }
+  }
+    catch (err) {
+      throw new BadRequestException("User cant be created!");
     }
   }
 
