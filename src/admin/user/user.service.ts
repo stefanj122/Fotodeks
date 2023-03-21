@@ -28,7 +28,7 @@ export class UserService {
     page: number,
     perPage: number,
     sortBy: string,
-  ): Promise<{ user: User[]; meta: Meta }> {
+  ): Promise<{ users: User[]; meta: Meta }> {
     const pagination = paginate(page, perPage);
     const userColumns = this.userRepository.metadata.columns.map(
       (column) => column.propertyName,
@@ -43,7 +43,7 @@ export class UserService {
       .getManyAndCount();
 
     return {
-      user: data,
+      users: data,
       meta: {
         count,
         currentPage: pagination.currentPage,

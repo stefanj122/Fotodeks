@@ -13,11 +13,13 @@ import {
   HttpCode,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { UserRoleGuard } from 'src/authentication/user-role.guard';
 import { CreateUserDto } from './dto/create-user.dto';
+import { User } from 'src/entity/user.entity';
+import { Meta } from 'src/types/meta.type';
 
 @ApiTags('admin-user')
 @Controller('/admin/user')
@@ -35,12 +37,15 @@ export class UserController {
     throw new ForbiddenException();
   }
 
+  @ApiQuery({ name: 'page', required: false})
+  @ApiQuery({ name: 'perPage', required: false})
+  @ApiQuery({ name: 'sortBy', required: false})
   @Get()
   async getListOfUsers(
     @Query('page') page: number,
     @Query('perPage') perPage: number,
     @Query('sortBy') sortBy: string,
-  ) {
+  ): Promise<{ users: User[]; meta: Meta }> {
     return await this.userService.getListOfUsers(page, perPage, sortBy);
   }
 
