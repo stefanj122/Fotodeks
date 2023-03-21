@@ -213,7 +213,7 @@ export class ImagesService {
     user: User,
     watermarkId?: number | undefined,
   ) {
-    const sizeOfImage = ['800x600', '640x480', '1920x1080'];
+    const sizeOfImage = ['640x480', '800x600', '1920x1080'];
     if (!sizeOfImage.includes(imageSize)) {
       throw new BadRequestException('Image size is not supported!');
     }
@@ -236,7 +236,7 @@ export class ImagesService {
       isApproved: true,
     });
     if (!image) {
-      throw new NotFoundException('Watermark not found!');
+      throw new NotFoundException('Image not found!');
     }
     const imagePath = join(__dirname, '../../../uploads/images/', image.name);
     const thumbnailPath = join(
