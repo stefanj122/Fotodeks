@@ -6,6 +6,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { paginate } from 'src/helpers/paginate.helper';
 import * as bcrypt from 'bcrypt';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class UserService {
@@ -22,18 +24,32 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
-  async getListOfUsers(page: number, perPage: number): Promise<{ data: User[]; count: number; perPage: number }> {
-    
+  async getListOfUsers(
+    page: number,
+    perPage: number,
+    sortBy: string,
+  ): Promise<{ user: User[]; meta: Meta }> {
     const pagination = paginate(page, perPage);
-    const [data, count] = await this.userRepository.findAndCount({
-      skip: pagination.offset,
-      take: pagination.limit
-    });
+    const userColumns = this.userRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, userColumns);
 
-    return { 
-      count,
-      data,
-      perPage: pagination.limit
+    const [data, count] = await this.userRepository
+      .createQueryBuilder('users')
+      .orderBy(`users.${column}`, `${order}`)
+      .offset(pagination.offset)
+      .limit(pagination.limit)
+      .getManyAndCount();
+
+    return {
+      user: data,
+      meta: {
+        count,
+        currentPage: pagination.currentPage,
+        perPage: pagination.limit,
+        sortBy: [column, order],
+      },
     };
   }
 
@@ -60,8 +76,8 @@ export class UserService {
     throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
-    if(dto.password) {
-      dto.password = await bcrypt.hash(dto.password, 10)
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10);
     } else {
       delete dto.password;
     }
