@@ -51,7 +51,7 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ id });
 
     if (user && user.role !== 'admin') {
-      return await this.userRepository.delete(user);
+      return await this.userRepository.remove(user);
     }
     throw new BadRequestException('User does not exist!');
   }

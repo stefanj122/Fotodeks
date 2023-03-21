@@ -14,6 +14,7 @@ import { paginate } from 'src/helpers/paginate.helper';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
+import * as sharp from 'sharp';
 
 @Injectable()
 export class ImagesService {
@@ -191,4 +192,34 @@ export class ImagesService {
       },
     };
   }
+  // async imageDownload(
+  //   imageID: number,
+  //   imageSize: string,
+  //   watermarkId?: number
+  // ) {
+  //   // const watermark = await this.watermarksRepository.findOneBy({
+  //   //   id: watermarkId,
+  //   // });
+  //  // const image = await this.imagesRepository.findOneBy({ id: imageID });
+
+  //   const [width, height] = imageSize.split('x');
+
+  //   try {
+  //     await sharp(await this.imagesRepository.findOneBy({ id: imageID }))
+  //       .resize(+width, +height)
+  //       .composite([
+  //         {
+  //           input: await this.watermarksRepository.findOneBy({
+  //             id: watermarkId,
+  //           });,
+  //           gravity: 'southeast'
+  //         },
+  //       ])
+  //       .toFile(thumbnailPath);
+  //     return true;
+  //   } catch (e) {
+  //     return false;
+  //   }
+
+  // }
 }

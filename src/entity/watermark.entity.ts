@@ -3,6 +3,9 @@ import { User } from './user.entity';
 
 @Entity({ name: 'watermark' })
 export class Watermark {
+  png() {
+    throw new Error('Method not implemented.');
+  }
   @PrimaryGeneratedColumn()
   id: number;
 
