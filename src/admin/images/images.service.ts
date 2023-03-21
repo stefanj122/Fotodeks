@@ -26,7 +26,9 @@ export class ImagesService {
     private watermarksRepository: Repository<Watermark>,
   ) {}
 
-  async updateImagesTags(imagesDataTags: { id: number; tags: string }[]) {
+  async updateImagesTags(
+    imagesDataTags: { id: number; tags: string }[],
+  ): Promise<string> {
     const arrOfPromises = [];
     imagesDataTags.forEach((element) => {
       arrOfPromises.push(
@@ -44,7 +46,7 @@ export class ImagesService {
   }
   async updateImageApprovalStatus(
     imagesData: { id: number; isApproved: boolean }[],
-  ) {
+  ): Promise<string> {
     const arrOfPromises = [];
     imagesData.forEach((element) => {
       arrOfPromises.push(
