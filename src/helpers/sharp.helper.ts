@@ -47,7 +47,6 @@ export const sharpHelper = async (
       .toFile(thumbnailPath);
     return true;
   } catch (e) {
-    console.error(e);
     return false;
   }
 };

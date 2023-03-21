@@ -106,13 +106,13 @@ export class ImagesController {
   })
   @Get('download/:imageId')
   async downloadImage(
-    @Param('imageId', ParseIntPipe) imageID: number,
+    @Param('imageId', ParseIntPipe) imageId: number,
     @Query('watermarkId') watermarkId: number | undefined,
     @Query('imageSize') imageSize: string,
     @GetUser() user: User,
   ) {
     return await this.imagesService.downloadImage(
-      imageID,
+      imageId,
       imageSize,
       user,
       watermarkId,

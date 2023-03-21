@@ -208,7 +208,7 @@ export class ImagesService {
     };
   }
   async downloadImage(
-    imageID: number,
+    imageId: number,
     imageSize: string,
     user: User,
     watermarkId?: number | undefined,
@@ -232,7 +232,7 @@ export class ImagesService {
       watermark.name,
     );
     const image = await this.imagesRepository.findOneBy({
-      id: imageID,
+      id: imageId,
       isApproved: true,
     });
     if (!image) {
