@@ -4,6 +4,7 @@ import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { paginate } from 'src/helpers/paginate.helper';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -21,9 +22,19 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
-  async getListOfUsers(): Promise<{ count: number; data: User[] }> {
-    const [data, count] = await this.userRepository.findAndCount();
-    return { count, data };
+  async getListOfUsers(page: number, perPage: number): Promise<{ data: User[]; count: number; perPage: number }> {
+    
+    const pagination = paginate(page, perPage);
+    const [data, count] = await this.userRepository.findAndCount({
+      skip: pagination.offset,
+      take: pagination.limit
+    });
+
+    return { 
+      count,
+      data,
+      perPage: pagination.limit
+    };
   }
 
   async getSingleUser(id: number): Promise<User> {

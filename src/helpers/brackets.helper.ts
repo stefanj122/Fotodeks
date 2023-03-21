@@ -1,5 +1,5 @@
 import { Brackets } from 'typeorm';
-import { permutationsOfArray } from './permutate-array.helper';
+import { permutationsOfArray } from './array-permutation.helper';
 
 export const permutateSearch = (searchQuery: string): Brackets => {
   return new Brackets((query) => {
