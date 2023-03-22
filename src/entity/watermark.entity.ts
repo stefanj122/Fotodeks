@@ -3,7 +3,6 @@ import { User } from './user.entity';
 
 @Entity({ name: 'watermark' })
 export class Watermark {
-  
   @PrimaryGeneratedColumn()
   id: number;
 

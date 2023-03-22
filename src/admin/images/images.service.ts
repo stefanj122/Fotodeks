@@ -20,6 +20,7 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
+import { imageSizeValidator } from 'src/validators/imageSize.validator';
 
 @Injectable()
 export class ImagesService {
@@ -213,11 +214,6 @@ export class ImagesService {
     user: User,
     watermarkId?: number | undefined,
   ) {
-    const sizeOfImage = ['640x480', '800x600', '1920x1080'];
-    if (!sizeOfImage.includes(imageSize)) {
-      throw new BadRequestException('Image size is not supported!');
-    }
-
     const watermark =
       user.role === 'admin' && watermarkId
         ? await this.watermarksRepository.findOneBy({ id: watermarkId })
@@ -253,7 +249,7 @@ export class ImagesService {
         imagePath,
         watermarkPath,
         join(thumbnailPath, image.name),
-        imageSize,
+        imageSizeValidator(imageSize),
       )
     ) {
       return {
