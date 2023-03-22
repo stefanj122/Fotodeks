@@ -214,6 +214,8 @@ export class ImagesService {
     user: User,
     watermarkId?: number | undefined,
   ) {
+    imageSizeValidator(imageSize);
+
     const watermark =
       user.role === 'admin' && watermarkId
         ? await this.watermarksRepository.findOneBy({ id: watermarkId })
@@ -249,7 +251,7 @@ export class ImagesService {
         imagePath,
         watermarkPath,
         join(thumbnailPath, image.name),
-        imageSizeValidator(imageSize),
+        imageSize,
       )
     ) {
       return {
