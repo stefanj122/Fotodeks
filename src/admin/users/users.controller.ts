@@ -27,8 +27,7 @@ import { Roles } from 'src/decorator/role.decorator';
 @UseGuards(UserRoleGuard)
 @Controller('/admin/user')
 export class UserController {
-  usersService: any;
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('/me')
   async getCurrentUser(@GetUser() user) {
@@ -53,13 +52,13 @@ export class UserController {
 
   @Get('/:id')
   async getSingleUser(@Param('id', ParseIntPipe) userId: number) {
-    return await this.userService.getSingleUser(userId);
+    return await this.usersService.getSingleUser(userId);
   }
 
   @Roles('admin')
   @Post()
   async createUser(@Body() userDto: CreateUserDto) {
-    return await this.userService.createUser(userDto);
+    return await this.usersService.createUser(userDto);
   }
 
   @Put('/:id')
@@ -67,13 +66,13 @@ export class UserController {
     @Param('id', ParseIntPipe) userId: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return await this.userService.updateUser(userId, updateUserDto);
+    return await this.usersService.updateUser(userId, updateUserDto);
   }
 
   @Roles('admin')
   @Delete('/:id')
   @HttpCode(204)
   async deleteUser(@Param('id', ParseIntPipe) userId: number): Promise<void> {
-    return await this.userService.deleteUser(userId);
+    return await this.usersService.deleteUser(userId);
   }
 }
