@@ -18,10 +18,13 @@ export class UserRoleGuard extends AuthGuard('jwt') implements CanActivate {
     ]);
 
     if (request?.user) {
-      return requiredRoles
-        ? requiredRoles === request.user.role
-        : request.user.role === 'user' || request.user.role === 'admin';
-    }
+
+    return requiredRoles
+      ? requiredRoles === request.user.role
+      : request.user.role === 'user' || request.user.role === 'admin';
+}
     return false;
   }
 }
+
+
