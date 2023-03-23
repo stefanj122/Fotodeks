@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -114,6 +116,27 @@ export class ImagesController {
       +userId,
       isApproved,
       sortBy,
+    );
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(UserRoleGuard)
+  @ApiQuery({
+    name: 'watermarkId',
+    required: false,
+  })
+  @Get('download/:imageId')
+  async downloadImage(
+    @Param('imageId', ParseIntPipe) imageId: number,
+    @Query('watermarkId') watermarkId: number | undefined,
+    @Query('imageSize') imageSize: string,
+    @GetUser() user: User,
+  ) {
+    return await this.imagesService.downloadImage(
+      imageId,
+      imageSize,
+      user,
+      watermarkId,
     );
   }
 }

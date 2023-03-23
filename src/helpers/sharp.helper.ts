@@ -14,6 +14,9 @@ export const sharpHelper = async (
   const watermark = sharp(watermarkPath).resize(
     +width * (isSmallest ? 0.8 : 0.2),
     +height * (isSmallest ? 0.8 : 0.2),
+    {
+      fit: sharp.fit.inside,
+    },
   );
   if (isSmallest) {
     watermark.composite([
