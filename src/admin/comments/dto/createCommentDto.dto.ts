@@ -20,5 +20,4 @@ export class CreateCommentDto {
   @ApiProperty()
   @IsString()
   content: string;
-  static imageID: any;
 }
