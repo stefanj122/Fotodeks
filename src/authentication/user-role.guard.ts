@@ -11,8 +11,10 @@ export class UserRoleGuard extends AuthGuard('jwt') implements CanActivate {
     await (super.canActivate(context) as Promise<boolean>);
     const request = context.switchToHttp().getRequest();
     if (request?.user) {
-      return request.user.role === 'user' || request.user.role === 'admin';
-    }
-    return false;
+      return (
+        request.user.role === "user" ||
+        request.user.role === "admin"
+      );
   }
+}
 }

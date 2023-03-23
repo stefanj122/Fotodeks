@@ -22,7 +22,7 @@ import { ImagesService } from './images.service';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Put('/approval')
+  @Put('images/approval')
   async updateImageApprovalStatus(
     @Body() imagesData: { id: number; isApproved: boolean }[],
   ) {
