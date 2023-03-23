@@ -6,22 +6,26 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { paginate } from 'src/helpers/paginate.helper';
 import * as bcrypt from 'bcrypt';
+import { UserDto } from 'src/authentication/dto/registerUser.dto';
+import { getUsername } from 'src/helpers/getUsername.helper';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private usersRepository: Repository<User>,
   ) {}
 
-  async findOne(input: string): Promise<User | undefined> {
-    return await this.userRepository
+  async findOne(input: string | UserDto): Promise<User | undefined> {
+    return await this.usersRepository
       .createQueryBuilder('user')
       .select('*')
-      .where('user.email = :email', { email: input })
-      .orWhere('user.displayName = :displayName', { displayName: input })
+      .where('user.email = :email', { email: getUsername(input, 'email') })
+      .orWhere('user.displayName = :displayName', {
+        displayName: getUsername(input, 'displayName'),
+      })
       .getRawOne();
   }
   async getListOfUsers(
@@ -30,12 +34,12 @@ export class UserService {
     sortBy: string,
   ): Promise<{ users: User[]; meta: Meta }> {
     const pagination = paginate(page, perPage);
-    const userColumns = this.userRepository.metadata.columns.map(
+    const userColumns = this.usersRepository.metadata.columns.map(
       (column) => column.propertyName,
     );
     const [column, order] = sortByHelper(sortBy, userColumns);
 
-    const [data, count] = await this.userRepository
+    const [data, count] = await this.usersRepository
       .createQueryBuilder('users')
       .orderBy(`users.${column}`, `${order}`)
       .offset(pagination.offset)
@@ -54,7 +58,7 @@ export class UserService {
   }
 
   async getSingleUser(id: number): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new BadRequestException('User not found!');
@@ -68,10 +72,10 @@ export class UserService {
       password: await bcrypt.hash(dto.password, 10),
     };
 
-    const newUser = await this.userRepository.save(user);
+    const newUser = await this.usersRepository.save(user);
 
     if (newUser) {
-      return { message: 'User is created succesfully.', data: newUser };
+      return { message: 'User is created successfully.', data: newUser };
     }
     throw new BadRequestException('User not created!');
   }
@@ -82,14 +86,14 @@ export class UserService {
       delete dto.password;
     }
 
-    return await this.userRepository.update(id, dto);
+    return await this.usersRepository.update(id, dto);
   }
 
   async deleteUser(id: number): Promise<void> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.usersRepository.findOneBy({ id });
 
     if (user && user.role !== 'admin') {
-      await this.userRepository.delete(user);
+      await this.usersRepository.remove(user);
     }
     throw new BadRequestException('User does not exist!');
   }

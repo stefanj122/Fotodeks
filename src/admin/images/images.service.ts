@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -16,6 +20,7 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
+import { imageSizeValidator } from 'src/validators/imageSizes.validator';
 
 @Injectable()
 export class ImagesService {
@@ -204,5 +209,56 @@ export class ImagesService {
         sortBy: [column, order],
       },
     };
+  }
+  async downloadImage(
+    imageId: number,
+    imageSize: string,
+    user: User,
+    watermarkId?: number | undefined,
+  ) {
+    imageSizeValidator(imageSize);
+
+    const watermark =
+      user.role === 'admin' && watermarkId
+        ? await this.watermarksRepository.findOneBy({ id: watermarkId })
+        : await this.watermarksRepository.findOneBy({ isDefault: true });
+
+    if (!watermark) {
+      throw new NotFoundException('Watermark not found!');
+    }
+    const watermarkPath = join(
+      __dirname,
+      '../../../uploads/watermarks/',
+      watermark.name,
+    );
+    const image = await this.imagesRepository.findOneBy({
+      id: imageId,
+      isApproved: true,
+    });
+    if (!image) {
+      throw new NotFoundException('Image not found!');
+    }
+    const imagePath = join(__dirname, '../../../uploads/images/', image.name);
+    const thumbnailPath = join(
+      __dirname,
+      '../../../public/images',
+      `${watermark.id}`,
+      imageSize,
+    );
+    if (!existsSync(thumbnailPath)) {
+      mkdirSync(thumbnailPath, { recursive: true });
+    }
+    if (
+      await sharpHelper(
+        imagePath,
+        watermarkPath,
+        join(thumbnailPath, image.name),
+        imageSize,
+      )
+    ) {
+      return {
+        path: makeUrlPath(['images', `${watermark.id}`, imageSize, image.name]),
+      };
+    }
   }
 }

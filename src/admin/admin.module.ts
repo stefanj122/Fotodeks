@@ -8,14 +8,14 @@ import { ImagesService } from 'src/images/images.service';
 import { WatermarksModule } from 'src/admin/watermarks/watermarks.module';
 import { CommentsModule } from './comments/comments.module';
 import { ImagesModule } from './images/images.module';
-import { UserModule } from './user/user.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Image, Watermark, Comment]),
     ImagesModule,
     CommentsModule,
-    UserModule,
+    UsersModule,
     WatermarksModule,
   ],
   providers: [ImagesService],
