@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from 'src/authentication/dto/registerUser.dto';
+import { getUsername } from 'src/helpers/getUsername.helper';
 
 @Injectable()
 export class UsersService {
@@ -15,20 +16,12 @@ export class UsersService {
   ) {}
 
   async findOne(input: string | UserDto): Promise<User | undefined> {
-    let searchParams: UserDto;
-    if (typeof input === 'string') {
-      searchParams = new UserDto();
-      searchParams.email = input;
-      searchParams.displayName = input;
-    } else {
-      searchParams = input;
-    }
     return await this.usersRepository
       .createQueryBuilder('user')
       .select('*')
-      .where('user.email = :email', { email: searchParams.email })
+      .where('user.email = :email', { email: getUsername(input, 'email') })
       .orWhere('user.displayName = :displayName', {
-        displayName: searchParams.displayName,
+        displayName: getUsername(input, 'displayName'),
       })
       .getRawOne();
   }

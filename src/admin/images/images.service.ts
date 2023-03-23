@@ -20,7 +20,7 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
-import { imageSizeValidator } from 'src/validators/imageSize.validator';
+import { imageSizeValidator } from 'src/validators/imageSizes.validator';
 
 @Injectable()
 export class ImagesService {
