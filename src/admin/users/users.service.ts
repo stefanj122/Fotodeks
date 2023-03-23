@@ -4,9 +4,12 @@ import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { paginate } from 'src/helpers/paginate.helper';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { getUsername } from 'src/helpers/getUsername.helper';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class UsersService {
@@ -25,9 +28,33 @@ export class UsersService {
       })
       .getRawOne();
   }
-  async getListOfUsers(): Promise<{ count: number; data: User[] }> {
-    const [data, count] = await this.usersRepository.findAndCount();
-    return { count, data };
+  async getListOfUsers(
+    page: number,
+    perPage: number,
+    sortBy: string,
+  ): Promise<{ users: User[]; meta: Meta }> {
+    const pagination = paginate(page, perPage);
+    const userColumns = this.usersRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, userColumns);
+
+    const [data, count] = await this.usersRepository
+      .createQueryBuilder('users')
+      .orderBy(`users.${column}`, `${order}`)
+      .offset(pagination.offset)
+      .limit(pagination.limit)
+      .getManyAndCount();
+
+    return {
+      users: data,
+      meta: {
+        count,
+        currentPage: pagination.currentPage,
+        perPage: pagination.limit,
+        sortBy: [column, order],
+      },
+    };
   }
 
   async getSingleUser(id: number): Promise<User> {
@@ -48,7 +75,7 @@ export class UsersService {
     const newUser = await this.usersRepository.save(user);
 
     if (newUser) {
-      return { message: 'User is created succesfully.', data: newUser };
+      return { message: 'User is created successfully.', data: newUser };
     }
     throw new BadRequestException('User not created!');
   }
