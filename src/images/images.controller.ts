@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SortByValidator } from 'src/validators/sortBy.validator';
 import { ImagesService } from './images.service';
@@ -6,6 +6,7 @@ import { ImagesService } from './images.service';
 @ApiTags('images')
 @Controller('/images')
 export class ImagesController {
+
   constructor(private readonly imagesService: ImagesService) {}
 
   @ApiQuery({ name: 'search', required: false })
@@ -24,6 +25,18 @@ export class ImagesController {
       page,
       perPage,
       sortBy,
+    );
+  }
+  @Get('/:id')
+  async findOneBy(
+    @Param('id') id: number,
+    @Query('page') page: number,
+    @Query('perPage') perPage: number,
+  ) {
+    return await this.imagesService.findOne(
+      id,
+      page,
+      perPage
     );
   }
 }
