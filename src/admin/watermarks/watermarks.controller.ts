@@ -10,17 +10,23 @@ import {
   Patch,
   Delete,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileValidator } from 'src/validators/file.validator';
 import { watermarksStorage } from 'src/config/multer.config';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import { WatermarksService } from './watermarks.service';
-import { CreateWatermarkType } from 'src/types/watermarkType';
+import { CreateWatermarkType } from 'src/types/watermark-type';
+import { UserRoleGuard } from 'src/authentication/user-role.guard';
+import { Roles } from 'src/decorator/role.decorator';
 
-@ApiTags('Watermarks')
-@Controller('/watermarks')
+@ApiTags('admin-watermarks')
+@ApiBearerAuth()
+@UseGuards(UserRoleGuard)
+@Roles('admin')
+@Controller('/admin/watermarks')
 export class WatermarksController {
   constructor(private readonly watermarksService: WatermarksService) {}
   @ApiConsumes('multipart/form-data')

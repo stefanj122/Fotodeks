@@ -9,8 +9,8 @@ import { Watermark } from 'src/entity/watermark.entity';
 import { Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
-import { CreateWatermarkType } from 'src/types/watermarkType';
-import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { CreateWatermarkType } from 'src/types/watermark-type';
+import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 
 @Injectable()
 export class WatermarksService {
@@ -22,10 +22,14 @@ export class WatermarksService {
     dto: CreateWatermarkDto,
     watermark: Express.Multer.File,
   ): Promise<CreateWatermarkType> {
-    fs.cpSync(
-      watermark.path,
-      join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
-    );
+    if (fs.existsSync(watermark.path)) {
+      fs.cpSync(
+        watermark.path,
+        join(__dirname, '../../public/watermarksStorage/' + watermark.filename),
+      );
+    } else {
+      throw new NotFoundException('Watermark does not exist');
+    }
     const newWatermark = await this.watermarksRepository.save({
       name: watermark.filename,
       description: dto.description,
@@ -72,7 +76,7 @@ export class WatermarksService {
     });
     if (watermark && watermark.isDefault === false) {
       await this.watermarksRepository.delete(id);
-      return {};
+      return;
     }
     throw new BadRequestException('Watermark cannot be deleted!');
   }

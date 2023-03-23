@@ -6,14 +6,16 @@ import { Image } from 'src/entity/image.entity';
 import { User } from 'src/entity/user.entity';
 import { Watermark } from 'src/entity/watermark.entity';
 import {
-  filerByUserAndIsApprved,
+  filterByUserAndIsApproved,
   permutateSearch,
 } from 'src/helpers/brackets.helper';
-import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 import { paginate } from 'src/helpers/paginate.helper';
-import { sharpHelper } from 'src/helpers/sharp.helpers';
+import { sharpHelper } from 'src/helpers/sharp.helper';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class ImagesService {
@@ -24,9 +26,27 @@ export class ImagesService {
     private watermarksRepository: Repository<Watermark>,
   ) {}
 
+  async updateImagesTags(
+    imagesDataTags: { id: number; tags: string }[],
+  ): Promise<string> {
+    const arrOfPromises = [];
+    imagesDataTags.forEach((element) => {
+      arrOfPromises.push(
+        this.imagesRepository.update(element.id, {
+          tags: element.tags,
+        }),
+      );
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
   async updateImageApprovalStatus(
     imagesData: { id: number; isApproved: boolean }[],
-  ) {
+  ): Promise<string> {
     const arrOfPromises = [];
     imagesData.forEach((element) => {
       arrOfPromises.push(
@@ -110,11 +130,16 @@ export class ImagesService {
     page?: number,
     perPage?: number,
     userId?: number,
-    isApproved?: number,
-    sortBy?: Record<number, 'ASC' | 'DESC'>,
-  ) {
+    isApproved?: boolean,
+    sortBy?: string,
+  ): Promise<{ images: Array<Image & { path: string }>; meta: Meta }> {
     const images: Array<Image & { path: string }> = [];
     const { currentPage, offset, limit } = paginate(page, perPage);
+    const imageColumns = this.imagesRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, imageColumns);
+
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
@@ -123,12 +148,23 @@ export class ImagesService {
       '../../../uploads/watermarks/',
       watermark.name,
     );
+
+    const thumbnailPath = join(
+      __dirname,
+      '../../public/images',
+      `${watermark.id}`,
+      process.env.BASE_THUMBNAIL_SIZE,
+    );
+    if (!existsSync(thumbnailPath)) {
+      mkdirSync(thumbnailPath, { recursive: true });
+    }
+
     const query = this.imagesRepository
       .createQueryBuilder('images')
       .leftJoinAndSelect('images.user', 'user')
-      .where(filerByUserAndIsApprved(userId, isApproved))
+      .where(filterByUserAndIsApproved(userId, isApproved))
       .andWhere(permutateSearch(searchQuery))
-      .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`);
+      .orderBy(`images.${column}`, `${order}`);
 
     const [data, count] = await query
       .offset(offset)
@@ -139,14 +175,8 @@ export class ImagesService {
       if (image.user) {
         delete image.user.password;
       }
-      const thumbnailPath = join(
-        __dirname,
-        '../../../public/images',
-        `${watermark.id}`,
-        process.env.BASE_THUMBNAIL_SIZE,
-      );
+
       if (!existsSync(join(thumbnailPath, image.name))) {
-        mkdirSync(thumbnailPath, { recursive: true });
         const imagePath = join(
           __dirname,
           '../../../uploads/images/',
@@ -171,7 +201,7 @@ export class ImagesService {
         count,
         currentPage,
         perPage: limit,
-        sortBy: [sortBy[0], sortBy[1]],
+        sortBy: [column, order],
       },
     };
   }

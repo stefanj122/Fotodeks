@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { User } from 'src/entity/user.entity';
 import { Image } from 'src/entity/image.entity';
 import { Repository } from 'typeorm';
-import { CreateCommentDto } from './dto/createCommentDto.dto';
+import { CreateCommentDto } from './dto/create-comment-dto.dto';
 
 @Injectable()
 export class CommentsService {
@@ -24,7 +28,6 @@ export class CommentsService {
     });
     const comment = await this.commentsRepository.findOne({
       where: { id: createCommentDto.commentId, isApproved: true },
-      relations: ['user'],
     });
     if (!comment && createCommentDto.commentId) {
       throw new NotFoundException('Comment not found');
@@ -38,5 +41,37 @@ export class CommentsService {
       parent: comment,
       ...createCommentDto,
     });
+  }
+
+  async deleteComment(id: number, user: User): Promise<void> {
+    const comment = await this.commentsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+    if (user.role === 'admin' || user.id === comment.user.id) {
+      this.commentsRepository.delete(id);
+      return;
+    }
+    throw new BadRequestException('Comment cannot be deleted!');
+  }
+
+  async approvalComments(commentsData: { id: number; isApproved: boolean }[]) {
+    const arrOfPromises = [];
+    commentsData.forEach((element) => {
+      arrOfPromises.push(
+        this.commentsRepository.update(element.id, {
+          isApproved: element.isApproved,
+        }),
+      );
+    });
+    try {
+      await Promise.all(arrOfPromises);
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 }

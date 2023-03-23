@@ -4,8 +4,8 @@ import { PassportModule } from '@nestjs/passport/dist';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/admin/user/user.module';
 import { User } from 'src/entity/user.entity';
-import { AuthController } from './autentication.controller';
-import { AuthService } from './autentication.service';
+import { AuthController } from './authentication.controller';
+import { AuthService } from './authentication.service';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 

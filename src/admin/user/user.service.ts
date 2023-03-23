@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserDto } from 'src/authentication/dto/registerUser.dto';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { paginate } from 'src/helpers/paginate.helper';
+import * as bcrypt from 'bcrypt';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
 
 @Injectable()
 export class UserService {
@@ -20,10 +24,33 @@ export class UserService {
       .orWhere('user.displayName = :displayName', { displayName: input })
       .getRawOne();
   }
+  async getListOfUsers(
+    page: number,
+    perPage: number,
+    sortBy: string,
+  ): Promise<{ users: User[]; meta: Meta }> {
+    const pagination = paginate(page, perPage);
+    const userColumns = this.userRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, userColumns);
 
-  async getListOfUsers(): Promise<{ count: number; data: User[] }> {
-    const [data, count] = await this.userRepository.findAndCount();
-    return { count, data };
+    const [data, count] = await this.userRepository
+      .createQueryBuilder('users')
+      .orderBy(`users.${column}`, `${order}`)
+      .offset(pagination.offset)
+      .limit(pagination.limit)
+      .getManyAndCount();
+
+    return {
+      users: data,
+      meta: {
+        count,
+        currentPage: pagination.currentPage,
+        perPage: pagination.limit,
+        sortBy: [column, order],
+      },
+    };
   }
 
   async getSingleUser(id: number): Promise<User> {
@@ -35,7 +62,12 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: UserDto) {
+  async createUser(dto: CreateUserDto) {
+    const user = {
+      ...dto,
+      password: await bcrypt.hash(dto.password, 10),
+    };
+
     const newUser = await this.userRepository.save(user);
 
     if (newUser) {
@@ -44,14 +76,20 @@ export class UserService {
     throw new BadRequestException('User not created!');
   }
   async updateUser(id: number, dto: UpdateUserDto) {
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10);
+    } else {
+      delete dto.password;
+    }
+
     return await this.userRepository.update(id, dto);
   }
 
-  async deleteUser(id: number): Promise<any> {
+  async deleteUser(id: number): Promise<void> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (user && user.role !== 'admin') {
-      return await this.userRepository.delete(user);
+      await this.userRepository.delete(user);
     }
     throw new BadRequestException('User does not exist!');
   }
