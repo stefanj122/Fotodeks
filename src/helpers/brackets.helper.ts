@@ -12,9 +12,9 @@ export const permutateSearch = (searchQuery: string): Brackets => {
   });
 };
 
-export const filerByUserAndIsApprved = (
+export const filerByUserAndIsApproved = (
   userId: number,
-  isApproved: number,
+  isApproved: boolean,
 ): Brackets => {
   return new Brackets((query) => {
     if (isApproved) {

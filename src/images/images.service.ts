@@ -73,7 +73,7 @@ export class ImagesService {
 
     return {
       images,
-      meat: {
+      meta: {
         count,
         currentPage,
         perPage: limit,

@@ -6,7 +6,7 @@ import { Image } from 'src/entity/image.entity';
 import { User } from 'src/entity/user.entity';
 import { Watermark } from 'src/entity/watermark.entity';
 import {
-  filerByUserAndIsApprved,
+  filerByUserAndIsApproved,
   permutateSearch,
 } from 'src/helpers/brackets.helper';
 import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
@@ -14,6 +14,7 @@ import { paginate } from 'src/helpers/paginate.helper';
 import { sharpHelper } from 'src/helpers/sharp.helpers';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ImagesService {
@@ -22,6 +23,8 @@ export class ImagesService {
     private imagesRepository: Repository<Image>,
     @InjectRepository(Watermark)
     private watermarksRepository: Repository<Watermark>,
+
+    private em: EventEmitter2,
   ) {}
 
   async updateImagesTags(imagesDataTags: { id: number; tags: string }[]) {
@@ -100,6 +103,7 @@ export class ImagesService {
           name: image.filename,
           user,
         });
+        this.em.emit('image.uploaded', photo);
         data.push({
           id: photo.id,
           name: photo.name,
@@ -126,7 +130,7 @@ export class ImagesService {
     page?: number,
     perPage?: number,
     userId?: number,
-    isApproved?: number,
+    isApproved?: boolean,
     sortBy?: Record<number, 'ASC' | 'DESC'>,
   ) {
     const images: Array<Image & { path: string }> = [];
@@ -142,7 +146,7 @@ export class ImagesService {
     const query = this.imagesRepository
       .createQueryBuilder('images')
       .leftJoinAndSelect('images.user', 'user')
-      .where(filerByUserAndIsApprved(userId, isApproved))
+      .where(filerByUserAndIsApproved(userId, isApproved))
       .andWhere(permutateSearch(searchQuery))
       .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`);
 

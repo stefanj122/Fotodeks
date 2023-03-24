@@ -6,10 +6,18 @@ import {
   Put,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UserRoleGuard } from 'src/authentication/user-role.guard';
 import { imagesStorage } from 'src/config/multer.config';
 import { GetUser } from 'src/decorator/get-user.decorator';
 import { User } from 'src/entity/user.entity';
@@ -51,6 +59,8 @@ export class ImagesController {
       },
     },
   })
+  @ApiBearerAuth()
+  @UseGuards(UserRoleGuard)
   @Post('/upload')
   @UseInterceptors(FilesInterceptor('images', 30, imagesStorage))
   async uploadImages(
@@ -73,7 +83,7 @@ export class ImagesController {
     @Query('userId') userId: number,
     @Query('page') page: number,
     @Query('perPage') perPage: number,
-    @Query('isApproved') isApproved: number,
+    @Query('isApproved') isApproved: boolean,
     @Query('sortBy', SortByValidator) sortBy: Record<string, 'ASC' | 'DESC'>,
   ) {
     return await this.imagesService.fetchImages(

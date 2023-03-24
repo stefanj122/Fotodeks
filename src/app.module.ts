@@ -9,12 +9,23 @@ import { ImagesModule } from './images/images.module';
 import { WatermarksModule } from './watermarks/watermarks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { NotificationsModule } from './notifications/notifications.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       exclude: ['/*'],
+    }),
+    EventEmitterModule.forRoot({
+      wildcard: false,
+      delimiter: '.',
+      newListener: false,
+      removeListener: false,
+      maxListeners: 10,
+      verboseMemoryLeak: false,
+      ignoreErrors: false,
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
@@ -34,6 +45,7 @@ import { join } from 'path';
     AdminModule,
     AuthModule,
     UserModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [AppService],
