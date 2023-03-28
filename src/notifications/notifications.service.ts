@@ -24,17 +24,21 @@ export class NotificationsService {
         type: 'image',
         user: image.user,
         message: '',
-        meta: `Imageid: ${image.id} `,
+        meta: `Imageid: ${image.id} `,      
       });
     } catch (e) {
       throw new BadRequestException('Notification cannot be created');
     }
-    const adminEmails = await this.usersRepository.find({
-      where: { role: 'admin' },
-      select: { email: true },
-    });
+    
+    const adminEmails = await this.usersRepository
+    .createQueryBuilder('user')
+    .select('email')
+    .where('user.role = :role', { role: "admin" })
+    // .andWhere('user.email = :email')
+    .getMany()
+    
+    
     const emails: string[] = adminEmails.map((user) => user.email);
-    console.log(emails);
     sendImageEmailNotification(emails, image.user.displayName, image.id);
   }
 }

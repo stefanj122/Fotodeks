@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -11,23 +12,23 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendImageEmailNotification = (
-  email: string[],
+  emails: string[],
   displayName: string,
   imageId: number,
 ) => {
   const notification = {
-    from: 'no-reply@fotodesk.app',
-    to: email,
+    from: process.env.APP_NO_REPLY_EMAIL,
+    to: emails,
     subject: 'You have a new images to approve!',
     html: `<h1>User ${displayName} uploaded some goodies on our platform.</h1>
-        <p>Please review them <a href="https://fotodesk.app/admin/images/pending-images/${imageId}">here</a></p>`,
+        <p>Please review them <a href=""process.env.BASE_URL" + "/admin/images/pending-images/${imageId}"">here</a></p>`,          
   };
 
-  transporter.sendMail(notification, function (err, info) {
+  transporter.sendMail(notification, function (err) {
     if (err) {
-      console.log(err);
-    } else {
-      console.log(info);
+      throw new BadRequestException('Sending notification failed');       
     }
   });
 };
+
+
