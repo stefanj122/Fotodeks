@@ -1,5 +1,4 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Image } from './image.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'notification' })
@@ -14,7 +13,7 @@ export class Notification {
   message: string;
 
   @Column({ type: 'varchar' })
-  type: Image | Comment;
+  type: 'image' | 'comment';
 
   @Column({ type: 'boolean', default: false })
   isSeen: boolean;

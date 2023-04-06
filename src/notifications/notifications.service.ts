@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { info } from 'console';
-import { Comment } from 'src/entity/comment.entity';
 import { Image } from 'src/entity/image.entity';
 import { Notification } from 'src/entity/notification.entity';
 import { User } from 'src/entity/user.entity';
@@ -16,8 +15,6 @@ export class NotificationsService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
-    @InjectRepository(Comment)
-    private readonly commentRepository: Repository<Comment>, // @InjectRepository(Image) // private readonly imageRepository: Repository<Image>,
   ) {}
 
   async imageUploaded(image: Image) {
@@ -27,22 +24,20 @@ export class NotificationsService {
           type: 'image',
           user: image.user,
           message: '',
-          // meta: 'imageId : ${image.Id}',
-          // meta:{"imageId":"${image.Id}"},
-          // meta: {"imageId"},
-          // meta: {
-          //           "image":
-          // {"Imageid" : "image.Id"}
-          // },
-          // meta: {
-          // // "image":
-          // [{"Imageid" : "${image.Id}"}]
-          // },
-          // meta:[{"imageId" : "${image.Id}"}],
+          meta: JSON.stringify({ imageId: image.id }),
         });
       } catch (err) {
-        logger.log;
-      };
+        logger.log(
+          'err',
+          'Error while sending notification for uploaded image to admins',
+        );
+      }
+      if (info) {
+        logger.log(
+          'info',
+          'Notification for uploaded image has been sent to admins',
+        );
+      }
 
       const emails = await this.usersRepository
         .createQueryBuilder('user')
