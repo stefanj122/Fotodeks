@@ -5,12 +5,12 @@ export const logger = createLogger({
     new transports.File({
       filename: 'notifications.log',
       level: 'info',
-      format: format.combine(format.timestamp(), format.json()),
+      format: format.combine(format.colorize(), format.timestamp(), format.json()),
     }),
     new transports.File({
       filename: 'notifications-error.log',
       level: 'error',
-      format: format.combine(format.timestamp(), format.json()),
+      format: format.combine(format.colorize(), format.timestamp(), format.json()),
     }),
   ],
 });

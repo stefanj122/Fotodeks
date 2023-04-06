@@ -26,13 +26,20 @@ export class NotificationsService {
           message: '',
           meta: JSON.stringify({ imageId: image.id }),
         });
-      } catch (err) { 
+      } catch (err)
+      { 
         logger.log(
           'err',
           'Error while sending notification for uploaded image to admins',
         );
       }
-     
+      if (info) {
+        logger.log(
+          'info',
+          'Notification for uploaded image has been sent to admins',
+        );
+      }
+
       const emails = await this.usersRepository
         .createQueryBuilder('user')
         .select('user.email')
