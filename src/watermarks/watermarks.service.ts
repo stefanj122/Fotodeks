@@ -9,7 +9,7 @@ import { Watermark } from 'src/entity/watermark.entity';
 import { Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
-import { CreateWatermarkType } from 'src/types/watermarkType';
+import { CreateWatermarkType } from 'src/types/watermark.type';
 import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
 
 @Injectable()

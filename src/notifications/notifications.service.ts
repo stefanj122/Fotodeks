@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from 'src/entity/image.entity';
 import { Notification } from 'src/entity/notification.entity';
 import { User } from 'src/entity/user.entity';
 import { sendImageEmailNotification } from 'src/helpers/email.helper';
+import { logger } from 'src/helpers/logger';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -24,11 +25,9 @@ export class NotificationsService {
           message: '',
           meta: JSON.stringify({ imageId: image.id }),
         });
-      } catch (err)
-      { 
-        return BadRequestException;
+      } catch (err) {
+        logger.log(err);
       }
-     
 
       const emails = await this.usersRepository
         .createQueryBuilder('user')
