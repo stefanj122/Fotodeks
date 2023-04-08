@@ -1,6 +1,12 @@
 import * as nodemailer from 'nodemailer';
 import { logger } from '../helpers/logger';
 
+/* export NODE_TLS_REJECT_UNAUTHORIZED='0'
+in terminal copy this before testing sending emails
+  export NODE_TLS_REJECT_UNAUTHORIZED='0'  
+  ,press enter and than start      npm run start:dev
+*/
+
 export const sendImageEmailNotification = (
   emails: string[],
   displayName: string,
