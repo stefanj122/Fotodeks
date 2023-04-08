@@ -9,8 +9,8 @@ export const sendImageEmailNotification = (
   const getTrans = () => {
     return nodemailer.createTransport({
       host: process.env.MAILER_HOST,
-      port: 587 /*process.env.MAILER_PORT*/,
-      secure: false /*process.env.MAILER_SECURE*/,
+      port: parseInt(process.env.MAILER_PORT),
+      secure: Boolean(process.env.MAILER_SECURE),
       auth: {
         user: process.env.USER_NAME,
         pass: process.env.USER_PASSWORD,
