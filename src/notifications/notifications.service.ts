@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { info } from 'console';
 import { Image } from 'src/entity/image.entity';
 import { Notification } from 'src/entity/notification.entity';
 import { User } from 'src/entity/user.entity';
 import { sendImageEmailNotification } from 'src/helpers/email.helper';
-import { logger } from 'src/helpers/logger';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -28,17 +26,9 @@ export class NotificationsService {
         });
       } catch (err)
       { 
-        logger.log(
-          'err',
-          'Error while sending notification for uploaded image to admins',
-        );
+        return BadRequestException;
       }
-      if (info) {
-        logger.log(
-          'info',
-          'Notification for uploaded image has been sent to admins',
-        );
-      }
+     
 
       const emails = await this.usersRepository
         .createQueryBuilder('user')
