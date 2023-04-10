@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Comment } from './comment.entity';
 import { Image } from './image.entity';
+import { Notification } from './notification.entity';
 import { Watermark } from './watermark.entity';
 
 @Entity({ name: 'users' })
@@ -25,6 +26,9 @@ export class User {
 
   @OneToMany(() => Comment, (comments) => comments.user)
   comments: Comment[];
+
+  @OneToMany(() => Notification, (notifications) => notifications.user)
+  notifications: Notification[];
 
   @Column({ type: 'varchar', length: 30 })
   firstName: string;

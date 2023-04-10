@@ -18,6 +18,7 @@ import { paginate } from 'src/helpers/paginate.helper';
 import { sharpHelper } from 'src/helpers/sharp.helper';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
 import { imageSizeValidator } from 'src/validators/imageSizes.validator';
@@ -29,6 +30,8 @@ export class ImagesService {
     private imagesRepository: Repository<Image>,
     @InjectRepository(Watermark)
     private watermarksRepository: Repository<Watermark>,
+
+    private em: EventEmitter2,
   ) {}
 
   async updateImagesTags(
@@ -109,6 +112,7 @@ export class ImagesService {
           name: image.filename,
           user,
         });
+        this.em.emit('image.uploaded', photo);
         data.push({
           id: photo.id,
           name: photo.name,
