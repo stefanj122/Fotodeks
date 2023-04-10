@@ -9,7 +9,7 @@ import { Watermark } from 'src/entity/watermark.entity';
 import { Repository } from 'typeorm';
 import { CreateWatermarkDto } from './dto/create-watermark.dto';
 import * as fs from 'fs';
-import { CreateWatermarkType } from 'src/types/watermark-type';
+import { CreateWatermarkType } from 'src/types/watermark.type';
 import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 
 @Injectable()
@@ -42,6 +42,7 @@ export class WatermarksService {
   }
 
   async getSingle(id: number): Promise<CreateWatermarkType> {
+    try{
     const { name, ...watermark } = await this.watermarksRepository.findOneBy({
       id,
     });
@@ -51,7 +52,10 @@ export class WatermarksService {
       ...watermark,
       path,
     };
+  } catch (err) {
+    throw new NotFoundException('Watermark does not exist');
   }
+}
 
   async updateWatermark(
     id: number,
