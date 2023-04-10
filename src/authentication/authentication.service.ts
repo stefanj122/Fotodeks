@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserService } from 'src/admin/user/user.service';
+import { UsersService } from 'src/admin/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayloadType } from 'src/types/payload.type';
 
@@ -13,19 +13,12 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private usersService: UserService,
+    private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
   async register(createUserDto: UserDto) {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .select('*')
-      .where('user.email = :email', { email: createUserDto.email })
-      .orWhere('user.displayName = :displayName', {
-        displayName: createUserDto.displayName,
-      })
-      .getRawOne();
+    const user = await this.usersService.findOne(createUserDto);
     if (user) {
       throw new BadRequestException('Email or display name is in use!');
     }
@@ -33,14 +26,19 @@ export class AuthService {
       ...createUserDto,
       password: await bcrypt.hash(createUserDto.password, 10),
     };
+
     const newUser = await this.userRepository.save(preparedUser);
     if (newUser) {
       delete newUser.password;
+      const { access_token } = await this.login(newUser);
       return {
-        message: 'Successfully created',
-        data: newUser,
-        access_token: await this.login(newUser),
+        access_token,
+        user: newUser,
       };
+    } else {
+      throw new BadRequestException(
+        'Something went wrong! User is not created!',
+      );
     }
   }
 

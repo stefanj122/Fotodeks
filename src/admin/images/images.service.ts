@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -6,15 +10,18 @@ import { Image } from 'src/entity/image.entity';
 import { User } from 'src/entity/user.entity';
 import { Watermark } from 'src/entity/watermark.entity';
 import {
-  filerByUserAndIsApproved,
+  filterByUserAndIsApproved,
   permutateSearch,
 } from 'src/helpers/brackets.helper';
-import { makeUrlPath } from 'src/helpers/makeUrlPath.helper';
+import { makeUrlPath } from 'src/helpers/make-url-path.helper';
 import { paginate } from 'src/helpers/paginate.helper';
-import { sharpHelper } from 'src/helpers/sharp.helpers';
+import { sharpHelper } from 'src/helpers/sharp.helper';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Meta } from 'src/types/meta.type';
+import { sortByHelper } from 'src/helpers/sort-by.helper';
+import { imageSizeValidator } from 'src/validators/imageSizes.validator';
 
 @Injectable()
 export class ImagesService {
@@ -27,7 +34,9 @@ export class ImagesService {
     private em: EventEmitter2,
   ) {}
 
-  async updateImagesTags(imagesDataTags: { id: number; tags: string }[]) {
+  async updateImagesTags(
+    imagesDataTags: { id: number; tags: string }[],
+  ): Promise<string> {
     const arrOfPromises = [];
     imagesDataTags.forEach((element) => {
       arrOfPromises.push(
@@ -45,7 +54,7 @@ export class ImagesService {
   }
   async updateImageApprovalStatus(
     imagesData: { id: number; isApproved: boolean }[],
-  ) {
+  ): Promise<string> {
     const arrOfPromises = [];
     imagesData.forEach((element) => {
       arrOfPromises.push(
@@ -131,10 +140,15 @@ export class ImagesService {
     perPage?: number,
     userId?: number,
     isApproved?: boolean,
-    sortBy?: Record<number, 'ASC' | 'DESC'>,
-  ) {
+    sortBy?: string,
+  ): Promise<{ images: Array<Image & { path: string }>; meta: Meta }> {
     const images: Array<Image & { path: string }> = [];
     const { currentPage, offset, limit } = paginate(page, perPage);
+    const imageColumns = this.imagesRepository.metadata.columns.map(
+      (column) => column.propertyName,
+    );
+    const [column, order] = sortByHelper(sortBy, imageColumns);
+
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
@@ -143,12 +157,23 @@ export class ImagesService {
       '../../../uploads/watermarks/',
       watermark.name,
     );
+
+    const thumbnailPath = join(
+      __dirname,
+      '../../public/images',
+      `${watermark.id}`,
+      process.env.BASE_THUMBNAIL_SIZE,
+    );
+    if (!existsSync(thumbnailPath)) {
+      mkdirSync(thumbnailPath, { recursive: true });
+    }
+
     const query = this.imagesRepository
       .createQueryBuilder('images')
       .leftJoinAndSelect('images.user', 'user')
-      .where(filerByUserAndIsApproved(userId, isApproved))
+      .where(filterByUserAndIsApproved(userId, isApproved))
       .andWhere(permutateSearch(searchQuery))
-      .orderBy(`images.${sortBy[0]}`, `${sortBy[1]}`);
+      .orderBy(`images.${column}`, `${order}`);
 
     const [data, count] = await query
       .offset(offset)
@@ -159,14 +184,8 @@ export class ImagesService {
       if (image.user) {
         delete image.user.password;
       }
-      const thumbnailPath = join(
-        __dirname,
-        '../../../public/images',
-        `${watermark.id}`,
-        process.env.BASE_THUMBNAIL_SIZE,
-      );
+
       if (!existsSync(join(thumbnailPath, image.name))) {
-        mkdirSync(thumbnailPath, { recursive: true });
         const imagePath = join(
           __dirname,
           '../../../uploads/images/',
@@ -191,8 +210,59 @@ export class ImagesService {
         count,
         currentPage,
         perPage: limit,
-        sortBy: [sortBy[0], sortBy[1]],
+        sortBy: [column, order],
       },
     };
+  }
+  async downloadImage(
+    imageId: number,
+    imageSize: string,
+    user: User,
+    watermarkId?: number | undefined,
+  ) {
+    imageSizeValidator(imageSize);
+
+    const watermark =
+      user.role === 'admin' && watermarkId
+        ? await this.watermarksRepository.findOneBy({ id: watermarkId })
+        : await this.watermarksRepository.findOneBy({ isDefault: true });
+
+    if (!watermark) {
+      throw new NotFoundException('Watermark not found!');
+    }
+    const watermarkPath = join(
+      __dirname,
+      '../../../uploads/watermarks/',
+      watermark.name,
+    );
+    const image = await this.imagesRepository.findOneBy({
+      id: imageId,
+      isApproved: true,
+    });
+    if (!image) {
+      throw new NotFoundException('Image not found!');
+    }
+    const imagePath = join(__dirname, '../../../uploads/images/', image.name);
+    const thumbnailPath = join(
+      __dirname,
+      '../../../public/images',
+      `${watermark.id}`,
+      imageSize,
+    );
+    if (!existsSync(thumbnailPath)) {
+      mkdirSync(thumbnailPath, { recursive: true });
+    }
+    if (
+      await sharpHelper(
+        imagePath,
+        watermarkPath,
+        join(thumbnailPath, image.name),
+        imageSize,
+      )
+    ) {
+      return {
+        path: makeUrlPath(['images', `${watermark.id}`, imageSize, image.name]),
+      };
+    }
   }
 }

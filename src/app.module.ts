@@ -2,11 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
-import { UserModule } from './admin/user/user.module';
-import { AppService } from './app.service';
-import { AuthModule } from './authentication/autentication.module';
+import { AuthModule } from './authentication/authentication.module';
 import { ImagesModule } from './images/images.module';
-import { WatermarksModule } from './watermarks/watermarks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -35,19 +32,16 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       port: parseInt(process.env.DATABASE_PORT),
-      entities: ['./dist/entitie/*.entitie.js'],
+      entities: ['./dist/entity/*.entity.js'],
       synchronize: true,
       migrations: ['./dist/migration/*.js'],
       autoLoadEntities: true,
     }),
-    WatermarksModule,
     ImagesModule,
     AdminModule,
     AuthModule,
     UserModule,
     NotificationsModule,
   ],
-  controllers: [],
-  providers: [AppService],
 })
 export class AppModule {}
