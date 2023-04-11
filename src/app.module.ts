@@ -40,7 +40,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ImagesModule,
     AdminModule,
     AuthModule,
-    UserModule,
     NotificationsModule,
   ],
 })
