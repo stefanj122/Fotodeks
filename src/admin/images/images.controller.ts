@@ -84,6 +84,8 @@ export class ImagesController {
       },
     },
   })
+  @ApiBearerAuth()
+  @UseGuards(UserRoleGuard)
   @Post('/upload')
   @UseInterceptors(FilesInterceptor('images', 30, imagesStorage))
   async uploadImages(
