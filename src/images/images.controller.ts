@@ -7,7 +7,6 @@ import { ImagesService } from './images.service';
 @ApiTags('public-images')
 @Controller('/public/images')
 export class ImagesController {
-
   constructor(private readonly imagesService: ImagesService) {}
 
   @ApiQuery({ name: 'search', required: false })
@@ -34,10 +33,6 @@ export class ImagesController {
     @Query('page') page: number,
     @Query('perPage') perPage: number,
   ) {
-    return await this.imagesService.findOne(
-      +id,
-      page,
-      perPage
-    );
+    return await this.imagesService.findOne(+id, page, perPage);
   }
 }
