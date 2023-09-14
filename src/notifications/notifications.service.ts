@@ -57,53 +57,41 @@ export class NotificationsService {
     });
   }
 
-    async imageApproved(imagesData: { id: number; isApproved: boolean }[]) {
+  async imageApproved(imagesData: { id: number; isApproved: boolean }[]) {
+    for (const image of imagesData) {
       try {
-
-    
-
-        // const image = await this.imagesRepository
-        //   .createQueryBuilder('images')
-        //   .leftJoinAndSelect('images.users', 'users')
-        //   .where('image = :id', { id  })
-        //   .getOne();
-
-
-        const user = await this.usersRepository
-          .createQueryBuilder('user')
-          .select('user.email')
-          .where('user.id = :id', { id: image.user.id })
+        const imageDb = await this.imagesRepository
+          .createQueryBuilder('images')
+          .leftJoinAndSelect('images.user', 'user')
+          .where('image = :id', { id: image.id })
           .getOne();
-        
-       
-        
+
         await this.notificationRepository.save({
           type: 'image',
-          user: image.user,
+          user: imageDb.user,
           message: '',
           meta: JSON.stringify({ imageId: image.id }),
         });
+
+        const mailData: MailDataT = {
+          email: imageDb.user.email,
+          subject: 'Image Approved',
+          template: 'image-approved',
+          context: {
+            displayName: imageDb.user.displayName,
+            imageId: imageDb.id,
+          },
+          mailerService: this.mailerService,
+        };
+
+        if (await sendMail(mailData)) {
+          return { status: 'Email sent.' };
+        } else {
+          return { status: 'Email not sent!' };
+        }
       } catch (err) {
         emailLogger.log({ level: 'error', message: err.message });
       }
-
-      if (
-        await sendMail(
-          user.email,
-          'Image Approved',
-          'image-approved',
-          {
-            name: image.user.displayName,
-            image: image.id,
-          },
-          this.mailerService,
-        )
-      ) {
-        return { status: 'Email sent.' };
-      } else {
-        return { status: 'Email not sent!' };
-      }
-
-    
     }
+  }
 }
