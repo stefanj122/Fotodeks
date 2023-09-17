@@ -26,11 +26,14 @@ export class NotificationsService {
       await this.notificationRepository.save({
         type: 'image',
         user: image.user,
-        message: '',
+        message: 'Image uploaded successfully!',
         meta: JSON.stringify({ imageId: image.id }),
       });
     } catch (err) {
-      emailLogger.log({ level: 'error', message: err.message });
+      emailLogger.log({
+        level: 'error',
+        message: JSON.stringify(err),
+      });
     }
 
     const emails = await this.usersRepository
@@ -90,7 +93,10 @@ export class NotificationsService {
           return { status: 'Email not sent!' };
         }
       } catch (err) {
-        emailLogger.log({ level: 'error', message: err.message });
+        emailLogger.log({
+          level: 'error',
+          message: JSON.stringify(err),
+        });
       }
     }
   }
