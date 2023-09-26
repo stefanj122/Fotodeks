@@ -53,6 +53,9 @@ export class NotificationsService {
       if (!notification) {
         throw new NotFoundException('Notification not found!');
       }
+      if (notification.isSeen === true) {
+        throw new Error('Notification is already seen!');
+      }
       await this.notificationRepository.update(id, { isSeen: true });
 
       return { status: 'success' };
