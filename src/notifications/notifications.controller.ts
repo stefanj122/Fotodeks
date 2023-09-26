@@ -8,7 +8,7 @@ export class NotificationsController {
   constructor(private readonly noticationsService: NotificationsService) {}
 
   @Patch('/isSeen/:id')
-  async isSeen(@Param('id', ParseIntPipe) id: number) {
+  async isSeen(@Param('notificationId', ParseIntPipe) id: number) {
     return await this.noticationsService.isSeen(id);
   }
 }
