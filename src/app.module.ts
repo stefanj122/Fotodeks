@@ -8,6 +8,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { UsersModule } from './admin/users/users.module';
 
 @Module({
   imports: [
@@ -40,7 +41,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ImagesModule,
     AdminModule,
     AuthModule,
-    UserModule,
+    UsersModule,
     NotificationsModule,
   ],
 })

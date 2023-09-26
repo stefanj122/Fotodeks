@@ -1,8 +1,6 @@
 export type Meta = {
-
-    count: number;
-    currentPage: number;
-    perPage: number;
-    sortBy: [string, 'ASC' | 'DESC'];
+  count: number;
+  currentPage: number;
+  perPage: number;
+  sortBy: [string, 'ASC' | 'DESC'];
 };
-
