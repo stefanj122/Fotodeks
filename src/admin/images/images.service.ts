@@ -67,8 +67,7 @@ export class ImagesService {
     });
     try {
       await Promise.all(arrOfPromises);
-
-      this.em.emit('image.approved', { imagesData });
+      this.em.emit('image.approved', imagesData);
       return 'success';
     } catch (error) {
       throw new BadRequestException();

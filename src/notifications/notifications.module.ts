@@ -7,10 +7,11 @@ import { Notification } from 'src/entity/notification.entity';
 import { Image } from 'src/entity/image.entity';
 import { Comment } from 'src/entity/comment.entity';
 import { ImageUploadListener } from 'src/events/image-upload.listener';
+import { ImageApprovalListener } from 'src/events/image-approved.listener';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notification, Image, Comment, User])],
   controllers: [NotificationsController],
-  providers: [NotificationsService, ImageUploadListener],
+  providers: [NotificationsService, ImageUploadListener, ImageApprovalListener],
 })
 export class NotificationsModule {}

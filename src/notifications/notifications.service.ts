@@ -43,7 +43,7 @@ export class NotificationsService {
       .getRawMany();
     emails.map(async (userEmail) => {
       const mailData: MailDataT = {
-        email: userEmail,
+        email: userEmail.user_email,
         subject: 'Image Uploaded',
         template: 'image-uploaded',
         context: {
@@ -66,7 +66,7 @@ export class NotificationsService {
         const imageDb = await this.imagesRepository
           .createQueryBuilder('images')
           .leftJoinAndSelect('images.user', 'user')
-          .where('image = :id', { id: image.id })
+          .where('images.id = :id', { id: image.id })
           .getOne();
 
         await this.notificationRepository.save({
@@ -95,7 +95,7 @@ export class NotificationsService {
       } catch (err) {
         emailLogger.log({
           level: 'error',
-          message: JSON.stringify(err),
+          message: JSON.stringify(err.message),
         });
       }
     }

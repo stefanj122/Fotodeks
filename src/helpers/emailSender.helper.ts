@@ -7,7 +7,7 @@ export function sendMail(mailData: MailDataT): Promise<boolean> {
   return mailerService
     .sendMail({
       to: email,
-      from: process.env.APP_EMAIL,
+      from: process.env.APP_NO_REPLY_EMAIL,
       subject,
       template,
       context,
