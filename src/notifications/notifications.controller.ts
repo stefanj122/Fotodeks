@@ -1,4 +1,4 @@
-import { Controller, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Controller, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 
@@ -8,7 +8,7 @@ export class NotificationsController {
   constructor(private readonly noticationsService: NotificationsService) {}
 
   @Patch('/isSeen/:id')
-  async isSeen(@Param('notificationId', ParseIntPipe) id: number) {
-    return await this.noticationsService.isSeen(id);
+  async isSeen(@Param('id') notificationId: number) {
+    return await this.noticationsService.isSeen(+notificationId);
   }
 }

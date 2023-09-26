@@ -56,7 +56,9 @@ export class NotificationsService {
       if (notification.isSeen === true) {
         throw new Error('Notification is already seen!');
       }
-      await this.notificationRepository.update(id, { isSeen: true });
+      await this.notificationRepository.update(id, {
+        isSeen: true,
+      });
 
       return { status: 'success' };
     } catch (err) {
