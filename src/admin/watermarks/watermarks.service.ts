@@ -42,20 +42,20 @@ export class WatermarksService {
   }
 
   async getSingle(id: number): Promise<CreateWatermarkType> {
-    try{
-    const { name, ...watermark } = await this.watermarksRepository.findOneBy({
-      id,
-    });
-    const path = makeUrlPath(['watermarksStorage', name]);
-    return {
-      name,
-      ...watermark,
-      path,
-    };
-  } catch (err) {
-    throw new NotFoundException('Watermark does not exist');
+    try {
+      const { name, ...watermark } = await this.watermarksRepository.findOneBy({
+        id,
+      });
+      const path = makeUrlPath(['watermarksStorage', name]);
+      return {
+        name,
+        ...watermark,
+        path,
+      };
+    } catch (err) {
+      throw new NotFoundException('Watermark does not exist');
+    }
   }
-}
 
   async updateWatermark(
     id: number,

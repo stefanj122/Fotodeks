@@ -100,22 +100,24 @@ export class ImagesService {
     page?: number,
     perPage?: number,
   ): Promise<{
-    image: Image & {path: string},
-    comments: Comment[],
-    meta: Meta
-  }>{
+    image: Image & { path: string };
+    comments: Comment[];
+    meta: Meta;
+  }> {
     const image = await this.imagesRepository.findOneBy({ id });
-    if(!image){
+    if (!image) {
       throw new NotFoundException('image not found');
     }
-    const watermark = await this.watermarksRepository.findOneBy({ isDefault: true });
+    const watermark = await this.watermarksRepository.findOneBy({
+      isDefault: true,
+    });
     const thumbnailPath = join(
       __dirname,
       '../../public/images',
       `${watermark.id}`,
       '800x600',
     );
-    if(!existsSync(thumbnailPath)){
+    if (!existsSync(thumbnailPath)) {
       mkdirSync(thumbnailPath, { recursive: true });
     }
     const watermarkPath = join(
@@ -125,31 +127,38 @@ export class ImagesService {
     );
     if (!existsSync(join(thumbnailPath, image.name))) {
       const imagePath = join(__dirname, '../../uploads/images/', image.name);
-      sharpHelper(imagePath, watermarkPath, join(thumbnailPath, image.name), '800x600');
-    }
-    const path =  makeUrlPath([
-        'images',
-        `${watermark.id}`,
+      sharpHelper(
+        imagePath,
+        watermarkPath,
+        join(thumbnailPath, image.name),
         '800x600',
-        image.name,
-      ])
+      );
+    }
+    const path = makeUrlPath([
+      'images',
+      `${watermark.id}`,
+      '800x600',
+      image.name,
+    ]);
     const { currentPage, offset, limit } = paginate(page, perPage);
-    const [comments, count] = await this.commentsRepository.createQueryBuilder('image')
-    .where({
-       image: id, isApproved: true 
-    })
-    .take(limit)
-    .skip(offset)
-    .getManyAndCount();
+    const [comments, count] = await this.commentsRepository
+      .createQueryBuilder('image')
+      .where({
+        image: id,
+        isApproved: true,
+      })
+      .take(limit)
+      .skip(offset)
+      .getManyAndCount();
 
     return {
-      image: { path, ...image},
+      image: { path, ...image },
       comments,
       meta: {
         count,
         currentPage,
         perPage: limit,
-        sortBy: null
+        sortBy: null,
       },
     };
   }
