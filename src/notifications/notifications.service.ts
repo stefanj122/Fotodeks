@@ -48,21 +48,17 @@ export class NotificationsService {
   }
 
   async isSeen(id: number) {
-    try {
-      const notification = await this.notificationRepository.findOneBy({ id });
-      if (!notification) {
-        throw new NotFoundException('Notification not found!');
-      }
-      if (notification.isSeen === true) {
-        throw new Error('Notification is already seen!');
-      }
-      await this.notificationRepository.update(id, {
-        isSeen: true,
-      });
-
-      return { status: 'success' };
-    } catch (err) {
-      throw new BadRequestException(err.message);
+    const notification = await this.notificationRepository.findOneBy({ id });
+    if (!notification) {
+      throw new NotFoundException('Notification not found!');
     }
+    if (notification.isSeen === true) {
+      throw new BadRequestException('Notification is already seen!');
+    }
+    await this.notificationRepository.update(id, {
+      isSeen: true,
+    });
+
+    return { status: 'success' };
   }
 }
