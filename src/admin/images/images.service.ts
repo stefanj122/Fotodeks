@@ -22,7 +22,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Meta } from 'src/types/meta.type';
 import { sortByHelper } from 'src/helpers/sort-by.helper';
 import { imageSizeValidator } from 'src/validators/imageSizes.validator';
-import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class ImagesService {
@@ -33,7 +32,6 @@ export class ImagesService {
     private watermarksRepository: Repository<Watermark>,
 
     private em: EventEmitter2,
-    private mailerService: MailerService,
   ) {}
 
   async updateImagesTags(
@@ -115,7 +113,7 @@ export class ImagesService {
           name: image.filename,
           user,
         });
-        this.em.emit('image.uploaded', photo);
+
         data.push({
           id: photo.id,
           name: photo.name,
@@ -134,6 +132,7 @@ export class ImagesService {
         fs.rmSync(image.path);
       }
     }
+    this.em.emit('images.uploaded', data);
     return { images: data };
   }
 

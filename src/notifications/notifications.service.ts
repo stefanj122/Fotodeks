@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from 'src/entity/image.entity';
 import { Notification } from 'src/entity/notification.entity';
 import { User } from 'src/entity/user.entity';
-import { sendMail } from 'src/helpers/emailSender.helper';
+import { sendMail } from 'src/helpers/email-sender.helper';
 import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import { emailLogger } from 'src/helpers/logger.helper';
@@ -21,13 +21,13 @@ export class NotificationsService {
     private readonly imagesRepository: Repository<Image>,
   ) {}
 
-  async imageUploaded(image: Image) {
+  async imageUploaded(images: Image[]) {
     try {
       await this.notificationRepository.save({
         type: 'image',
-        user: image.user,
+        user: images[0].user,
         message: 'Image uploaded successfully!',
-        meta: JSON.stringify({ imageId: image.id }),
+        meta: JSON.stringify({ imageIds: images.map((image) => image.id) }),
       });
     } catch (err) {
       emailLogger.log({
@@ -36,28 +36,72 @@ export class NotificationsService {
       });
     }
 
-    const emails = await this.usersRepository
+    const adminEmails = await this.usersRepository
       .createQueryBuilder('user')
       .select('user.email')
       .where('user.role = :role', { role: 'admin' })
       .getRawMany();
-    emails.map(async (userEmail) => {
-      const mailData: MailDataT = {
-        email: userEmail.user_email,
-        subject: 'Image Uploaded',
-        template: 'image-uploaded',
-        context: {
-          displayName: image.user.displayName,
-          imageId: image.id,
-        },
-        mailerService: this.mailerService,
-      };
-      if (await sendMail(mailData)) {
-        return { status: 'Email sent.' };
-      } else {
-        return { status: 'Email not sent!' };
-      }
-    });
+
+    // const imagesData = images.map((image) => ({
+    //   displayName: image.user.displayName,
+    //   imageId: image.id,
+    //   link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
+    // }));
+
+
+    const imagesData = [];
+
+    for (const image of images) {
+      imagesData.push({
+        displayName: image.user.displayName,
+        imageId: image.id,
+        link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
+      });
+    }
+    //
+    // emails.map(async (userEmail) => {
+    //   const mailData: MailDataT = {
+    //     email: userEmail.user_email,
+    //     subject: 'Image Uploaded',
+    //     template: 'image-uploaded',
+    //     context: {
+    //       imageData,
+    //     },
+    //     mailerService: this.mailerService,
+    //   };
+
+
+    adminEmails.map(async (userEmail) => {
+        const mailData: MailDataT = {
+          email: userEmail.user_email,
+          subject: 'Images Uploaded',
+          template: 'image-uploaded',
+          context: {
+            imagesData,
+
+          },
+          mailerService: this.mailerService,
+        };
+
+        try {
+          if (await sendMail(mailData)) {
+            return { email: userEmail.user_email, status: 'Email sent.' };
+          } else {
+            return { email: userEmail.user_email, status: 'Email not sent!' };
+          }
+        } catch (error) {
+          return { email: userEmail.user_email, status: 'Email error: ' + error.message };
+        }
+      });
+
+
+
+    //   if (await sendMail(mailData)) {
+    //     return { status: 'Email sent.' };
+    //   } else {
+    //     return { status: 'Email not sent!' };
+    //   }
+    // });
   }
 
   async imageApproved(imagesData: { id: number; isApproved: boolean }[]) {
