@@ -52,9 +52,11 @@
         </div>
 
         <div class="body">
-            <h4 class="p1">User {{ displayName }} uploaded some goodies on our platform.</h4>
-            <p>Please review them <a class="button" href=`https://fotodesk.app/admin/images/pending-images/{{ imageId }}`>here</a></p>
-            <p>Regards, Fotodesk App</p>
+          {% for item in items %}
+          <h4 class="p1">User {{ item.displayName }} uploaded some goodies on our platform.</h4>
+          <p>Please review them <a class="button" href="{{ item.link }}">here</a></p>
+          {% endfor %}
+          <p>Regards, Fotodesk App</p>
         </div>
 
         <div class="footer"></div>
