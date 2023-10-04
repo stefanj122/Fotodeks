@@ -9,8 +9,7 @@ export type MailDataT = {
 };
 
 export type ContextT = {
-    displayName?: string;
-    imageId?: number;
-    link?: string;
-
+  displayName?: string;
+  imageId?: number;
+  link?: string;
 };

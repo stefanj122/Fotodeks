@@ -35,73 +35,40 @@ export class NotificationsService {
         message: JSON.stringify(err),
       });
     }
-
     const adminEmails = await this.usersRepository
       .createQueryBuilder('user')
       .select('user.email')
       .where('user.role = :role', { role: 'admin' })
       .getRawMany();
 
-    // const imagesData = images.map((image) => ({
-    //   displayName: image.user.displayName,
-    //   imageId: image.id,
-    //   link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
-    // }));
-
-
-    const imagesData = [];
-
-    for (const image of images) {
-      imagesData.push({
-        displayName: image.user.displayName,
-        imageId: image.id,
-        link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
-      });
-    }
-    //
-    // emails.map(async (userEmail) => {
-    //   const mailData: MailDataT = {
-    //     email: userEmail.user_email,
-    //     subject: 'Image Uploaded',
-    //     template: 'image-uploaded',
-    //     context: {
-    //       imageData,
-    //     },
-    //     mailerService: this.mailerService,
-    //   };
-
+    const imagesData = images.map((image) => ({
+      displayName: image.user.displayName,
+      imageId: image.id,
+      link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
+    }));
 
     adminEmails.map(async (userEmail) => {
-        const mailData: MailDataT = {
-          email: userEmail.user_email,
-          subject: 'Images Uploaded',
-          template: 'image-uploaded',
-          context: {
-            imagesData,
+      const mailData: MailDataT = {
+        email: userEmail.user_email,
+        subject: 'Images Uploaded',
+        template: 'image-uploaded',
+        context: imagesData,
+        mailerService: this.mailerService,
+      };
 
-          },
-          mailerService: this.mailerService,
-        };
-
-        try {
-          if (await sendMail(mailData)) {
-            return { email: userEmail.user_email, status: 'Email sent.' };
-          } else {
-            return { email: userEmail.user_email, status: 'Email not sent!' };
-          }
-        } catch (error) {
-          return { email: userEmail.user_email, status: 'Email error: ' + error.message };
+      try {
+        if (await sendMail(mailData)) {
+          return { email: userEmail.user_email, status: 'Email sent.' };
+        } else {
+          return { email: userEmail.user_email, status: 'Email not sent!' };
         }
-      });
-
-
-
-    //   if (await sendMail(mailData)) {
-    //     return { status: 'Email sent.' };
-    //   } else {
-    //     return { status: 'Email not sent!' };
-    //   }
-    // });
+      } catch (error) {
+        return {
+          email: userEmail.user_email,
+          status: 'Email error: ' + error.message,
+        };
+      }
+    });
   }
 
   async imageApproved(imagesData: { id: number; isApproved: boolean }[]) {
@@ -121,13 +88,15 @@ export class NotificationsService {
         });
 
         const mailData: MailDataT = {
-          email: imageDb.user.email,
+          email: [imageDb.user.email],
           subject: 'Image Approved',
           template: 'image-approved',
-          context: {
-            displayName: imageDb.user.displayName,
-            imageId: imageDb.id,
-          },
+          context: [
+            {
+              displayName: imageDb.user.displayName,
+              imageId: imageDb.id,
+            },
+          ],
           mailerService: this.mailerService,
         };
 
