@@ -52,10 +52,13 @@
         </div>
 
         <div class="body">
-          {% for item in items %}
-          <h4 class="p1">User {{ item.displayName }} uploaded some goodies on our platform.</h4>
-          <p>Please review them <a class="button" href="{{ item.link }}">here</a></p>
-          {% endfor %}
+
+          {{#each context}}
+            <h4 class="p1">User {{ this.displayName }} uploaded some goodies on our platform.</h4>
+          <p>Please review them <a class="button" href="{{ this.link }}">here</a></p>
+          {{else}}
+            <h1>Can't fetch data!</h1>
+          {{/each}}
           <p>Regards, Fotodesk App</p>
         </div>
 

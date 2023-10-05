@@ -132,7 +132,7 @@ export class ImagesService {
         fs.rmSync(image.path);
       }
     }
-    this.em.emit('images.uploaded', data);
+    this.em.emit('images.uploaded', { data, user });
     return { images: data };
   }
 

@@ -1,10 +1,10 @@
 import { MailerService } from '@nestjs-modules/mailer';
 
 export type MailDataT = {
-  email: string[];
+  email: string;
   subject: string;
   template: string;
-  context: ContextT[];
+  context?: { context: ContextT[] };
   mailerService: MailerService;
 };
 

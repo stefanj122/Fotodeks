@@ -21,13 +21,15 @@ export class NotificationsService {
     private readonly imagesRepository: Repository<Image>,
   ) {}
 
-  async imageUploaded(images: Image[]) {
+  async imageUploaded(uploadData: { data: Image[]; user: User }) {
     try {
       await this.notificationRepository.save({
         type: 'image',
-        user: images[0].user,
+        user: uploadData.user,
         message: 'Image uploaded successfully!',
-        meta: JSON.stringify({ imageIds: images.map((image) => image.id) }),
+        meta: JSON.stringify({
+          imageIds: uploadData.data.map((image) => image.id),
+        }),
       });
     } catch (err) {
       emailLogger.log({
@@ -39,32 +41,35 @@ export class NotificationsService {
       .createQueryBuilder('user')
       .select('user.email')
       .where('user.role = :role', { role: 'admin' })
-      .getRawMany();
+      .getMany();
 
-    const imagesData = images.map((image) => ({
-      displayName: image.user.displayName,
-      imageId: image.id,
-      link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
-    }));
+    const imagesData = [];
 
+    for (const image of uploadData.data) {
+      imagesData.push({
+        displayName: uploadData.user.displayName,
+        imageId: image.id,
+        link: `https://fotodesk.app/admin/images/pending-images/${image.id}`,
+      });
+    }
     adminEmails.map(async (userEmail) => {
       const mailData: MailDataT = {
-        email: userEmail.user_email,
+        email: userEmail.email,
         subject: 'Images Uploaded',
         template: 'image-uploaded',
-        context: imagesData,
+        context: { context: imagesData },
         mailerService: this.mailerService,
       };
 
       try {
         if (await sendMail(mailData)) {
-          return { email: userEmail.user_email, status: 'Email sent.' };
+          return { email: userEmail.email, status: 'Email sent.' };
         } else {
-          return { email: userEmail.user_email, status: 'Email not sent!' };
+          return { email: userEmail.email, status: 'Email not sent!' };
         }
       } catch (error) {
         return {
-          email: userEmail.user_email,
+          email: userEmail.email,
           status: 'Email error: ' + error.message,
         };
       }
@@ -88,15 +93,17 @@ export class NotificationsService {
         });
 
         const mailData: MailDataT = {
-          email: [imageDb.user.email],
+          email: imageDb.user.email,
           subject: 'Image Approved',
           template: 'image-approved',
-          context: [
-            {
-              displayName: imageDb.user.displayName,
-              imageId: imageDb.id,
-            },
-          ],
+          context: {
+            context: [
+              {
+                displayName: imageDb.user.displayName,
+                imageId: imageDb.id,
+              },
+            ],
+          },
           mailerService: this.mailerService,
         };
 
