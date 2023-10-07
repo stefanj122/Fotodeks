@@ -137,8 +137,9 @@ export class ImagesService {
         fs.rmSync(image.path);
       }
     }
-
-    this.em.emit('images.uploaded', { uploadedPhotos, user });
+    if (uploadedPhotos.length > 0) {
+      this.em.emit('images.uploaded', { uploadedPhotos, user });
+    }
     return { imagesUploaded: uploadedPhotos, imagesFailed: failedPhotos };
   }
 
