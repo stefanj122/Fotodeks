@@ -76,7 +76,8 @@ export class ImagesService {
     images: Array<Express.Multer.File>,
     user: User,
   ): Promise<{ images: { id: number; name: string; path: string }[] }> {
-    const data = [];
+    const uploadedPhotos = [];
+    const failedPhotos = [];
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
@@ -102,6 +103,7 @@ export class ImagesService {
         '../../../uploads/images/',
         image.filename,
       );
+
       if (
         await sharpHelper(
           imagePath,
@@ -114,7 +116,7 @@ export class ImagesService {
           user,
         });
 
-        data.push({
+        uploadedPhotos.push({
           id: photo.id,
           name: photo.name,
           path: makeUrlPath([
@@ -125,15 +127,16 @@ export class ImagesService {
           ]),
         });
       } else {
-        data.push({
+        failedPhotos.push({
           name: image.originalname,
           message: `${image.originalname} can not be uploaded!`,
         });
         fs.rmSync(image.path);
       }
     }
-    this.em.emit('images.uploaded', { data, user });
-    return { images: data };
+
+    this.em.emit('images.uploaded', { uploadedPhotos, user });
+    return { images: uploadedPhotos };
   }
 
   async fetchImages(

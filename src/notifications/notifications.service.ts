@@ -21,14 +21,14 @@ export class NotificationsService {
     private readonly imagesRepository: Repository<Image>,
   ) {}
 
-  async imageUploaded(uploadData: { data: Image[]; user: User }) {
+  async imageUploaded(uploadData: { uploadedPhotos: Image[]; user: User }) {
     try {
       await this.notificationRepository.save({
         type: 'image',
         user: uploadData.user,
         message: 'Image uploaded successfully!',
         meta: JSON.stringify({
-          imageIds: uploadData.data.map((image) => image.id),
+          imageIds: uploadData.uploadedPhotos.map((image) => image.id),
         }),
       });
     } catch (err) {
@@ -45,7 +45,7 @@ export class NotificationsService {
 
     const imagesData = [];
 
-    for (const image of uploadData.data) {
+    for (const image of uploadData.uploadedPhotos) {
       imagesData.push({
         displayName: uploadData.user.displayName,
         imageId: image.id,

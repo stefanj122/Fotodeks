@@ -8,7 +8,7 @@ import { User } from '../entity/user.entity';
 export class ImageUploadListener {
   constructor(private readonly notificationService: NotificationsService) {}
   @OnEvent('images.uploaded')
-  handleImageUploadEvent(uploadData: { data: Image[]; user: User }) {
+  handleImageUploadEvent(uploadData: { uploadedPhotos: Image[]; user: User }) {
     this.notificationService.imageUploaded(uploadData);
   }
 }
