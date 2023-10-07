@@ -73,9 +73,12 @@ export class ImagesService {
   }
 
   async uploadImages(
-    images: Array<Express.Multer.File>,
+    imagesUploaded: Array<Express.Multer.File>,
     user: User,
-  ): Promise<{ images: { id: number; name: string; path: string }[] }> {
+  ): Promise<{
+    imagesUploaded: { id: number; name: string; path: string }[];
+    imagesFailed: { name: string; message: string }[];
+  }> {
     const uploadedPhotos = [];
     const failedPhotos = [];
     const watermark = await this.watermarksRepository.findOneBy({
@@ -97,7 +100,7 @@ export class ImagesService {
       mkdirSync(thumbnailPath, { recursive: true });
     }
 
-    for (const image of images) {
+    for (const image of imagesUploaded) {
       const imagePath = join(
         __dirname,
         '../../../uploads/images/',
@@ -136,7 +139,7 @@ export class ImagesService {
     }
 
     this.em.emit('images.uploaded', { uploadedPhotos, user });
-    return { images: uploadedPhotos };
+    return { imagesUploaded: uploadedPhotos, imagesFailed: failedPhotos };
   }
 
   async fetchImages(

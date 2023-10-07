@@ -92,7 +92,7 @@ export class ImagesController {
     @UploadedFiles(FileValidator)
     images: Express.Multer.File[],
     @GetUser() user: User,
-  ): Promise<{ images: { id: number; name: string; path: string }[] }> {
+  ): Promise<{ imagesUploaded: { id: number; name: string; path: string }[] }> {
     return await this.imagesService.uploadImages(images, user);
   }
 
