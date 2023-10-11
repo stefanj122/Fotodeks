@@ -78,35 +78,34 @@ export class NotificationsService {
 
   async imageApproved(imagesData: { id: number; isApproved: boolean }[]) {
     for (const image of imagesData) {
+      const imageDb = await this.imagesRepository
+        .createQueryBuilder('images')
+        .leftJoinAndSelect('images.user', 'user')
+        .where('images.id = :id', { id: image.id })
+        .getOne();
+
+      await this.notificationRepository.save({
+        type: 'image',
+        user: imageDb.user,
+        message: '',
+        meta: JSON.stringify({ imageId: image.id }),
+      });
+
+      const imagesData = [];
+
+      imagesData.push({
+        link: `https://fotodesk.app/images/${image.id}`,
+      });
+
+      const mailData: MailDataT = {
+        email: imageDb.user.email,
+        subject: 'Image Approved',
+        template: 'image-approved',
+        context: { context: imagesData },
+        mailerService: this.mailerService,
+      };
+
       try {
-        const imageDb = await this.imagesRepository
-          .createQueryBuilder('images')
-          .leftJoinAndSelect('images.user', 'user')
-          .where('images.id = :id', { id: image.id })
-          .getOne();
-
-        await this.notificationRepository.save({
-          type: 'image',
-          user: imageDb.user,
-          message: '',
-          meta: JSON.stringify({ imageId: image.id }),
-        });
-
-        const mailData: MailDataT = {
-          email: imageDb.user.email,
-          subject: 'Image Approved',
-          template: 'image-approved',
-          context: {
-            context: [
-              {
-                displayName: imageDb.user.displayName,
-                imageId: imageDb.id,
-              },
-            ],
-          },
-          mailerService: this.mailerService,
-        };
-
         if (await sendMail(mailData)) {
           return { status: 'Email sent.' };
         } else {

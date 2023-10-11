@@ -52,9 +52,13 @@
         </div>
 
         <div class="body">
-            <h4 class="p1">Your submission was approved!</h4>
-            <p>Your image was approved. You can see it <a class="button" href=`https://fotodesk.app/images/{{ imageId }}`>here</a></p>
-            <p>Regards, Fotodesk App</p>
+      {{#each context}}
+    <h4 class="p1">Your submission was approved!</h4>
+            <p>Your image was approved. You can see it <a class="button" href=`{{ this.link }}`>here</a></p>
+        {{else}}
+          <h1>Can't fetch data!</h1>
+      {{/each}}
+          <p>Regards, Fotodesk App</p>
         </div>
 
         <div class="footer"></div>
