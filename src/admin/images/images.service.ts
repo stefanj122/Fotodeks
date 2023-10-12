@@ -52,38 +52,73 @@ export class ImagesService {
       throw new BadRequestException();
     }
   }
-  async updateImageApprovalStatus(
-    imagesData: { id: number; isApproved: boolean }[],
-  ): Promise<string> {
-    const arrOfPromises = [];
+  // async updateImageApprovalStatus(
+  //   imagesData: { id: number; isApproved: boolean }[],
+  // ): Promise<string> {
+  //   const arrOfPromises = [];
+  //
+  //   for (const element of imagesData) {
+  //     const image = await this.imagesRepository.findOneBy({ id: element.id });
+  //     if (!image) {
+  //       throw new BadRequestException();
+  //     }
+  //
+  //     if (image.isApproved === true) {
+  //       arrOfPromises.push(
+  //         this.imagesRepository.update(element.id, {
+  //           isApproved: false,
+  //         }),
+  //       );
+  //       // return `Image with ID: ${element.id} is disapproved!`;
+  //     } else {
+  //       arrOfPromises.push(
+  //         this.imagesRepository.update(element.id, {
+  //           isApproved: element.isApproved,
+  //         }),
+  //       );
+  //       try {
+  //         await Promise.all(arrOfPromises);
+  //         this.em.emit('image.approved', imagesData);
+  //         return `Image with ID: ${element.id} is approved successfully!`;
+  //       } catch (error) {
+  //         throw new BadRequestException(error.message);
+  //       }
+  //     }
+  //   }
+  // }
 
-    for (const element of imagesData) {
-      const image = await this.imagesRepository.findOneBy({ id: element.id });
-      if (!image) {
-        throw new BadRequestException();
-      }
+  async updateImageApprovalStatus(imageIds: number[]): Promise<string> {
+    const approvedImages: Image[] = [];
+    const disapprovedImages: Image[] = [];
 
+
+    const images = await this.imagesRepository
+      .createQueryBuilder('image')
+      .leftJoinAndSelect('image.user', 'user')
+      .where('image.id IN (:...imageIds)', { imageIds })
+      .getMany();
+
+    for (const image of images) {
       if (image.isApproved === true) {
-        arrOfPromises.push(
-          this.imagesRepository.update(element.id, {
-            isApproved: false,
-          }),
-        );
-        return `Image with ID: ${element.id} is disapproved!`;
+        disapprovedImages.push(image);
+        image.isApproved = false;
       } else {
-        arrOfPromises.push(
-          this.imagesRepository.update(element.id, {
-            isApproved: element.isApproved,
-          }),
-        );
-        try {
-          await Promise.all(arrOfPromises);
-          this.em.emit('image.approved', imagesData);
-          return `Image with ID: ${element.id} is approved successfully!`;
-        } catch (error) {
-          throw new BadRequestException(error.message);
-        }
+        approvedImages.push(image);
+        image.isApproved = true;
       }
+    }
+
+    try {
+      await this.imagesRepository.save([
+        ...approvedImages,
+        ...disapprovedImages,
+      ]);
+      if (approvedImages.length > 0) {
+        this.em.emit('images.approved', approvedImages);
+      }
+      return 'success';
+    } catch (error) {
+      throw new BadRequestException();
     }
   }
 
