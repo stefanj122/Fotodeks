@@ -52,40 +52,6 @@ export class ImagesService {
       throw new BadRequestException();
     }
   }
-  // async updateImageApprovalStatus(
-  //   imagesData: { id: number; isApproved: boolean }[],
-  // ): Promise<string> {
-  //   const arrOfPromises = [];
-  //
-  //   for (const element of imagesData) {
-  //     const image = await this.imagesRepository.findOneBy({ id: element.id });
-  //     if (!image) {
-  //       throw new BadRequestException();
-  //     }
-  //
-  //     if (image.isApproved === true) {
-  //       arrOfPromises.push(
-  //         this.imagesRepository.update(element.id, {
-  //           isApproved: false,
-  //         }),
-  //       );
-  //       // return `Image with ID: ${element.id} is disapproved!`;
-  //     } else {
-  //       arrOfPromises.push(
-  //         this.imagesRepository.update(element.id, {
-  //           isApproved: element.isApproved,
-  //         }),
-  //       );
-  //       try {
-  //         await Promise.all(arrOfPromises);
-  //         this.em.emit('image.approved', imagesData);
-  //         return `Image with ID: ${element.id} is approved successfully!`;
-  //       } catch (error) {
-  //         throw new BadRequestException(error.message);
-  //       }
-  //     }
-  //   }
-  // }
 
   async updateImageApprovalStatus(imageIds: number[]): Promise<string> {
     const approvedImages: Image[] = [];

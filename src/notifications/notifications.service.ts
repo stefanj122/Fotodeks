@@ -19,7 +19,8 @@ export class NotificationsService {
     private readonly mailerService: MailerService,
     @InjectRepository(Image)
     private readonly imagesRepository: Repository<Image>,
-  ) {}
+  ) {
+  }
 
   async imageUploaded(uploadData: { uploadedPhotos: Image[]; user: User }) {
     try {
@@ -75,6 +76,7 @@ export class NotificationsService {
       }
     });
   }
+
   async imageApproved(approvedImages: Image[]) {
     const emailsAndImageUrls = new Map();
 
@@ -131,122 +133,5 @@ export class NotificationsService {
     }
 
     return results;
-
-    // for (const [email, imageUrls] of emailsAndImageUrls) {
-    //
-    //   const emailData = {
-    //     email,
-    //     subject: 'Images Approved',
-    //     template: 'image-approved',
-    //     context: { context: imageUrls },
-    //     mailerService: this.mailerService,
-    //   };
-    //
-    //   try {
-    //     console.log('dolazi')
-    //     if (await sendMail(emailData)) {
-    //       console.log('ulazi salje')
-    //       return { status: 'Email sent.' };
-    //     } else {
-    //       return { status: 'Email not sent!' };
-    //     }
-    //   } catch (err) {
-    //     emailLogger.log({
-    //       level: 'error',
-    //       message: JSON.stringify(err.message),
-    //     });
-    //   }
-    // }
   }
-
-  // async imageApproved(approvedImages: Image[]) {
-  //   for (const image of approvedImages) {
-  //     const imageDb = await this.imagesRepository
-  //       .createQueryBuilder('images')
-  //       .leftJoinAndSelect('images.user', 'user')
-  //       .where('images.id = :id', { id: image.id })
-  //       .getOne();
-  //
-  //
-  //     await this.notificationRepository.save({
-  //       type: 'image',
-  //       user: imageDb.user,
-  //       message: '',
-  //       meta: JSON.stringify({ imageId: image.id }),
-  //     });
-  //
-  //     const imagesData = [];
-  //     imagesData.push({
-  //       link: `https://fotodesk.app/images/${image.id}`,
-  //     });
-  //
-  //
-  //     const mailData = {
-  //       email: imageDb.user.email,
-  //       subject: 'Image Approved',
-  //       template: 'image-approved',
-  //       context: { context: imagesData},
-  //       mailerService: this.mailerService,
-  //     };
-  //
-  //     try {
-  //       if (await sendMail(mailData)) {
-  //         return { status: 'Email sent.' };
-  //       } else {
-  //         return { status: 'Email not sent!' };
-  //       }
-  //     } catch (err) {
-  //       emailLogger.log({
-  //         level: 'error',
-  //         message: JSON.stringify(err.message),
-  //       });
-  //       return { status: 'Email not sent!' };
-  //     }
-  //   }
-  // }
-
-  //   async imageApproved(approvedImages: Image[]) {
-  //     for (const image of imagesData) {
-  //       const imageDb = await this.imagesRepository
-  //         .createQueryBuilder('images')
-  //         .leftJoinAndSelect('images.user', 'user')
-  //         .where('images.id = :id', { id: image.id })
-  //         .getOne();
-  //
-  //       await this.notificationRepository.save({
-  //         type: 'image',
-  //         user: imageDb.user,
-  //         message: '',
-  //         meta: JSON.stringify({ imageId: image.id }),
-  //       });
-  //
-  //       const imagesData = [];
-  //
-  //       imagesData.push({
-  //         link: `https://fotodesk.app/images/${image.id}`,
-  //       });
-  //
-  //       const mailData: MailDataT = {
-  //         email: imageDb.user.email,
-  //         subject: 'Image Approved',
-  //         template: 'image-approved',
-  //         context: { context: imagesData },
-  //         mailerService: this.mailerService,
-  //       };
-  //
-  //       try {
-  //         if (await sendMail(mailData)) {
-  //           return { status: 'Email sent.' };
-  //         } else {
-  //           return { status: 'Email not sent!' };
-  //         }
-  //       } catch (err) {
-  //         emailLogger.log({
-  //           level: 'error',
-  //           message: JSON.stringify(err.message),
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
 }
