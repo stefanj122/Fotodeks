@@ -10,7 +10,7 @@ export function sendMail(mailData: MailDataT): Promise<boolean> {
       from: process.env.APP_NO_REPLY_EMAIL,
       subject,
       template,
-      context,
+      context: context,
     })
     .then((response) => {
       emailLogger.log({

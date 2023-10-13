@@ -108,7 +108,7 @@ export class NotificationsService {
     const results = [];
 
     for (const [email, imageUrls] of emailsAndImageUrls) {
-      const emailData = {
+      const mailData = {
         email,
         subject: 'Images Approved',
         template: 'image-approved',
@@ -117,9 +117,7 @@ export class NotificationsService {
       };
 
       try {
-        console.log('dolazi');
-        if (await sendMail(emailData)) {
-          console.log('ulazi salje');
+        if (await sendMail(mailData)) {
           results.push({ status: 'Email sent.' });
         } else {
           results.push({ status: 'Email not sent!' });
@@ -127,7 +125,7 @@ export class NotificationsService {
       } catch (err) {
         emailLogger.log({
           level: 'error',
-          message: JSON.stringify(err.message),
+          message: JSON.stringify(err),
         });
       }
     }
