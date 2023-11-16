@@ -10,6 +10,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { UsersModule } from './admin/users/users.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     ImagesModule,
     AdminModule,
     AuthModule,
+    UsersModule,
     NotificationsModule,
   ],
 })

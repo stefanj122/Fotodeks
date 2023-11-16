@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from 'src/entity/image.entity';
 import { Notification } from 'src/entity/notification.entity';
@@ -131,5 +135,20 @@ export class NotificationsService {
     }
 
     return results;
+  }
+
+  async isSeen(id: number) {
+    const notification = await this.notificationRepository.findOneBy({ id });
+    if (!notification) {
+      throw new NotFoundException('Notification not found!');
+    }
+    if (notification.isSeen === true) {
+      throw new BadRequestException('Notification is already seen!');
+    }
+    await this.notificationRepository.update(id, {
+      isSeen: true,
+    });
+
+    return { status: 'success' };
   }
 }
