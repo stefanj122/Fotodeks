@@ -52,19 +52,36 @@ export class ImagesService {
       throw new BadRequestException();
     }
   }
-  async updateImageApprovalStatus(
-    imagesData: { id: number; isApproved: boolean }[],
-  ): Promise<string> {
-    const arrOfPromises = [];
-    imagesData.forEach((element) => {
-      arrOfPromises.push(
-        this.imagesRepository.update(element.id, {
-          isApproved: element.isApproved,
-        }),
-      );
-    });
+
+  async updateImageApprovalStatus(imageIds: number[]): Promise<string> {
+    const approvedImages: Image[] = [];
+    const disapprovedImages: Image[] = [];
+
+
+    const images = await this.imagesRepository
+      .createQueryBuilder('image')
+      .leftJoinAndSelect('image.user', 'user')
+      .where('image.id IN (:...imageIds)', { imageIds })
+      .getMany();
+
+    for (const image of images) {
+      if (image.isApproved === true) {
+        disapprovedImages.push(image);
+        image.isApproved = false;
+      } else {
+        approvedImages.push(image);
+        image.isApproved = true;
+      }
+    }
+
     try {
-      await Promise.all(arrOfPromises);
+      await this.imagesRepository.save([
+        ...approvedImages,
+        ...disapprovedImages,
+      ]);
+      if (approvedImages.length > 0) {
+        this.em.emit('images.approved', approvedImages);
+      }
       return 'success';
     } catch (error) {
       throw new BadRequestException();
@@ -72,10 +89,14 @@ export class ImagesService {
   }
 
   async uploadImages(
-    images: Array<Express.Multer.File>,
+    imagesUploaded: Array<Express.Multer.File>,
     user: User,
-  ): Promise<{ images: { id: number; name: string; path: string }[] }> {
-    const data = [];
+  ): Promise<{
+    imagesUploaded: { id: number; name: string; path: string }[];
+    imagesFailed: { name: string; message: string }[];
+  }> {
+    const uploadedPhotos = [];
+    const failedPhotos = [];
     const watermark = await this.watermarksRepository.findOneBy({
       isDefault: true,
     });
@@ -95,12 +116,13 @@ export class ImagesService {
       mkdirSync(thumbnailPath, { recursive: true });
     }
 
-    for (const image of images) {
+    for (const image of imagesUploaded) {
       const imagePath = join(
         __dirname,
         '../../../uploads/images/',
         image.filename,
       );
+
       if (
         await sharpHelper(
           imagePath,
@@ -112,8 +134,8 @@ export class ImagesService {
           name: image.filename,
           user,
         });
-        this.em.emit('image.uploaded', photo);
-        data.push({
+
+        uploadedPhotos.push({
           id: photo.id,
           name: photo.name,
           path: makeUrlPath([
@@ -124,14 +146,17 @@ export class ImagesService {
           ]),
         });
       } else {
-        data.push({
+        failedPhotos.push({
           name: image.originalname,
           message: `${image.originalname} can not be uploaded!`,
         });
         fs.rmSync(image.path);
       }
     }
-    return { images: data };
+    if (uploadedPhotos.length > 0) {
+      this.em.emit('images.uploaded', { uploadedPhotos, user });
+    }
+    return { imagesUploaded: uploadedPhotos, imagesFailed: failedPhotos };
   }
 
   async fetchImages(

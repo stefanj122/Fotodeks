@@ -56,17 +56,14 @@ export class ImagesController {
     schema: {
       type: 'array',
       items: {
-        type: 'object',
-        properties: { id: { type: 'number' }, isApproved: { type: 'boolean' } },
+        type: 'number',
       },
     },
   })
   @Roles('admin')
   @Put('/approval')
-  async updateImageApprovalStatus(
-    @Body() imagesData: { id: number; isApproved: boolean }[],
-  ): Promise<string> {
-    return await this.imagesService.updateImageApprovalStatus(imagesData);
+  async updateImageApprovalStatus(@Body() imageIds: number[]): Promise<string> {
+    return await this.imagesService.updateImageApprovalStatus(imageIds);
   }
 
   @ApiConsumes('multipart/form-data')
@@ -92,7 +89,10 @@ export class ImagesController {
     @UploadedFiles(FileValidator)
     images: Express.Multer.File[],
     @GetUser() user: User,
-  ): Promise<{ images: { id: number; name: string; path: string }[] }> {
+  ): Promise<{
+    imagesUploaded: { id: number; name: string; path: string }[];
+    imagesFailed: { name: string; message: string }[];
+  }> {
     return await this.imagesService.uploadImages(images, user);
   }
 
